@@ -21,6 +21,9 @@ robodata = "robodata.cli.main:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"robodata.eval.robodojo" = ["catalogs/*.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--import-mode=importlib"

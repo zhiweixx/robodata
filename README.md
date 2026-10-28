@@ -10,6 +10,10 @@ The repository separates the reusable agent, execution, environment and percepti
 code from benchmark rules. Model weights, simulator assets, videos, credentials
 and raw trajectories live outside Git.
 
+For the collaborator’s **30 states per task / all 42 tasks** run, use the
+[professor runbook](docs/PROFESSOR_RUNBOOK.md). It creates a separate 1,207-episode
+campaign with the same model, perception harness and native action budgets.
+
 ## Quickstart
 
 Use Python **3.12**. The following commands install only the CPU package and tests;

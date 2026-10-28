@@ -59,6 +59,9 @@ def migrate_manifest(original_path):
 
 
 def validate_manifest(manifest):
+    from .state_subset import STATE_SUBSET_SCHEMA, validate_state_subset
+    if isinstance(manifest, dict) and manifest.get('portable_schema') == STATE_SUBSET_SCHEMA:
+        return validate_state_subset(manifest)
     if canonical_sha256(manifest)!=PORTABLE_MANIFEST_SHA256:
         raise ManifestError('reviewed semantic manifest bytes changed')
     validate_subset_manifest(manifest)
@@ -107,11 +110,14 @@ def verify_sources(manifest, benchmark_root, assets_root, group_id=None):
             'groups_verified': [g['group_id'] for g in groups]}
 
 
-def plan_shards(manifest, num_shards=51):
+def plan_shards(manifest, num_shards=None):
     """Assign complete native groups once; never split replacement pools."""
     validate_manifest(manifest)
-    if type(num_shards) is not int or not 1 <= num_shards <= len(manifest['groups']):
-        raise ValueError('shard count must be between 1 and 51')
+    count = len(manifest['groups'])
+    if num_shards is None:
+        num_shards = count
+    if type(num_shards) is not int or not 1 <= num_shards <= count:
+        raise ValueError(f'shard count must be between 1 and {count}')
     assignments = [{'shard_index': i, 'group_ids': []} for i in range(num_shards)]
     for i, group in enumerate(manifest['groups']): assignments[i % num_shards]['group_ids'].append(group['group_id'])
     return assignments

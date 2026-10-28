@@ -5,7 +5,8 @@
 1. `README.md`: current pipeline, supported scope and CPU quickstart.
 2. `docs/installation.md` and `docs/cluster.md`: environment setup and GPU execution.
 3. `docs/evaluation.md`: state identity, native scoring, resume and audit rules.
-4. `docs/migration.md`: mapping from the older experiment repository.
+4. `docs/PROFESSOR_RUNBOOK.md`: independent 30-state/all-42-task handoff.
+5. `docs/migration.md`: mapping from the older experiment repository.
 
 This is a robot data project. RoboDojo evaluation is one consumer of shared
 execution/perception code. Keep benchmark rules in `src/robodata/eval/robodojo`;

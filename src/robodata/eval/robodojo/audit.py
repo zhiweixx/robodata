@@ -1,6 +1,6 @@
-"""Read-only native scoring, evidence and resource audit for the portable767 run.
+"""Read-only native scoring, evidence and resource audit for a planned subset.
 
-Native scores are authoritative. Full completion requires all767 scores plus
+Native scores are authoritative. Full completion requires every planned score plus
 committed reports, three camera videos, immutable imports and raw usage evidence.
 This custom subset is not an official RoboDojo full leaderboard score.
 """
@@ -340,12 +340,13 @@ def audit_campaign(campaign_dir,full=False):
             for field in ('scored','target','success','score_sum'):item[field]+=row[field]
         for item in target.values():item['success_rate']=item['success']/item['scored'] if item['scored'] else None
     scored=sum(g['scored'] for g in groups);success=sum(g['success'] for g in groups)
+    target_episodes=sum(g['target'] for g in groups)
     return {'schema':'robodata.robodojo.audit.v1','campaign_dir':str(campaign),'full_evidence_audit':full,
-        'is_official_full_evaluation':False,'target':767,'scored':scored,'success':success,
+        'is_official_full_evaluation':False,'target':target_episodes,'scored':scored,'success':success,
         'success_rate':success/scored if scored else None,'groups_scores_complete':sum(g['scores_complete'] for g in groups),
-        'complete':bool(full and not errors and scored==767 and all(g['evidence_verified'] for g in groups)),
+        'complete':bool(full and not errors and scored==target_episodes and all(g['evidence_verified'] for g in groups)),
         'source_tree_sha256':inventory['tree_sha256'],'groups':groups,'by_family':by_family,'by_category':by_category,
         'usage':usage if full else None,'unscored_model_interface_smoke_usage':smoke_usage if full else None,'worker_attempts':attempts if full else None,'errors':errors,
-        'notes':['Only767 new scores are included; no historical40 results.',
+        'notes':[f'This plan requests {target_episodes} new scores; no historical results are merged.',
             'Worker wall times overlap across nodes: their sum is resource time, not elapsed completion time.',
             'Partial observed success is not an official five-category RoboDojo Avg.']}

@@ -52,7 +52,7 @@ def publish_campaign(temporary, output):
     temporary.rmdir()
 
 
-def plan_campaign(repo, manifest_path, config_path, output, shards=51):
+def plan_campaign(repo, manifest_path, config_path, output, shards=None):
     from robodata.eval.robodojo.manifest import load_manifest, plan_shards
     repo = Path(repo).resolve(strict=True)
     output = Path(output).expanduser().resolve()
@@ -110,11 +110,17 @@ def main(argv=None):
         item = sub.add_parser(command, add_help=False,
             help="deployment tools; pass --help for options")
         item.add_argument("arguments", nargs=argparse.REMAINDER)
+    item = sub.add_parser("make-manifest", help="select distinct official states per task family")
+    item.add_argument("--states-per-task", type=int, required=True,
+                      help="requested distinct states per family; even number from 2 to 50")
+    item.add_argument("--exclude-family", action="append", default=[],
+                      help="optional family to exclude (repeat for multiple families)")
+    item.add_argument("--output", required=True, help="new JSON manifest path; never overwrites")
     item = sub.add_parser("plan", help="freeze source/config and assign disjoint native groups")
     item.add_argument("--manifest", required=True)
     item.add_argument("--config", required=True)
     item.add_argument("--output", required=True, help="new campaign directory")
-    item.add_argument("--shards", type=int, default=51)
+    item.add_argument("--shards", type=int, help="whole-group shards; defaults to one per selected configuration")
     item = sub.add_parser("run", help="run one planned native group in a Slurm allocation")
     item.add_argument("--campaign-dir", required=True)
     item.add_argument("--group-id", required=True)
@@ -134,7 +140,22 @@ def main(argv=None):
                                     args.command, *tail])
         if unknown:
             parser.error("unrecognized arguments: " + " ".join(unknown))
-        if args.command == "plan":
+        if args.command == "make-manifest":
+            from robodata.eval.robodojo.state_subset import build_state_subset
+            manifest = build_state_subset(args.states_per_task, args.exclude_family)
+            path = Path(args.output).expanduser().resolve()
+            path.parent.mkdir(parents=True, exist_ok=True)
+            encoded = json.dumps(manifest, indent=2, allow_nan=False) + "\n"
+            with path.open("x", encoding="utf-8") as handle:
+                handle.write(encoded)
+            value = {"manifest": str(path), "task_families": manifest["family_count"],
+                     "configuration_groups": manifest["group_count"],
+                     "requested_states_per_task": manifest["per_family_target"],
+                     "target_episodes": manifest["total_target_episodes"],
+                     "candidate_states": manifest["total_candidate_episodes"],
+                     "finite_layout_exceptions": manifest["exception_family_targets"],
+                     "excluded_families": manifest["excluded_families"]}
+        elif args.command == "plan":
             value = plan_campaign(repository_root(args.repo), args.manifest,
                                   args.config, args.output, args.shards)
         elif args.command == "run":
