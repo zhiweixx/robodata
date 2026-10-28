@@ -1,0 +1,81 @@
+diff --git a/XPolicyLab b/XPolicyLab
+--- a/XPolicyLab
++++ b/XPolicyLab
+@@ -1 +1 @@
+-Subproject commit 53c5da5a01bc720d1cf0e6ab6ed212e8cef0eda2
++Subproject commit 53c5da5a01bc720d1cf0e6ab6ed212e8cef0eda2-dirty
+diff --git a/env/environment/base_env.py b/env/environment/base_env.py
+index bcde808..0b6960f 100644
+--- a/env/environment/base_env.py
++++ b/env/environment/base_env.py
+@@ -7,7 +7,7 @@ from isaaclab.scene import InteractiveSceneCfg
+ from isaaclab_tasks.utils import parse_env_cfg  # this need dynamic import
+ from isaacsim.core.utils.stage import get_current_stage
+ from omegaconf import DictConfig, OmegaConf
+-from omni.physx import acquire_physx_interface
++from omni.physx import get_physx_interface
+ 
+ from env.environment.isaac.isaac_rl_env import IsaacRLEnv
+ from env.seeding import seed_everywhere
+@@ -193,7 +193,7 @@ class BaseEnv(gym.Env):
+         This function will be called after simulation context is created
+         """
+         # enable cpu garment and deformable
+-        self.physics_interface = acquire_physx_interface()
++        self.physics_interface = get_physx_interface()
+         self.physics_interface.overwrite_gpu_setting(1)
+ 
+         # expose physics context
+diff --git a/env/seed_manager/seed_manager.py b/env/seed_manager/seed_manager.py
+index 3c8c74f..3ab0e51 100644
+--- a/env/seed_manager/seed_manager.py
++++ b/env/seed_manager/seed_manager.py
+@@ -43,6 +43,22 @@ class SeedManager:
+             self.seed_info[idx] = {"scene_layout": file_path}
+ 
+         all_layout_ids = list(range(len(matching_files)))
++        # Restrict the queue itself so failed/unstable episodes cannot be
++        # replaced by an unrequested layout. EVAL_NUM only caps scored results.
++        layout_ids_env = os.environ.get("EVAL_LAYOUT_IDS")
++        if layout_ids_env is not None:
++            fields = [value.strip() for value in layout_ids_env.split(",")]
++            if not fields or any(re.fullmatch(r"[0-9]+", value) is None for value in fields):
++                raise ValueError("EVAL_LAYOUT_IDS must be a non-empty comma-separated list of nonnegative integers")
++            requested = [int(value) for value in fields]
++            requested_set = set(requested)
++            if len(requested_set) != len(requested):
++                raise ValueError("EVAL_LAYOUT_IDS must not contain duplicate layout IDs")
++            missing = sorted(requested_set - set(all_layout_ids))
++            if missing:
++                raise ValueError(f"EVAL_LAYOUT_IDS contains unavailable layout IDs for {self.task_name}: {missing}")
++            all_layout_ids = [layout_id for layout_id in all_layout_ids if layout_id in requested_set]
++            print(f"[SeedManager] EVAL_LAYOUT_IDS restricts the queue to {all_layout_ids}")
+         excluded = set(int(s) for s in (completed_layout_ids or [])) | set(int(s) for s in (abandoned_layout_ids or []))
+         if excluded:
+             self.seed_list: List[int] = [s for s in all_layout_ids if s not in excluded]
+diff --git a/src/eval_client/main.py b/src/eval_client/main.py
+index d0c2c90..d8e8636 100644
+--- a/src/eval_client/main.py
++++ b/src/eval_client/main.py
+@@ -5,9 +5,14 @@ import json
+ import os
+ import sys
+ 
++# Resolve RoboDojo utilities before Kit registers OpenCV utilities.
++import utils.load_file
++
+ from isaaclab.app import AppLauncher
+ 
+-MAX_INPROC_RESTARTS = 3
++MAX_INPROC_RESTARTS = int(os.environ.get("ROBODOJO_MAX_INPROC_RESTARTS", "3"))
++if MAX_INPROC_RESTARTS < 0:
++    raise ValueError("ROBODOJO_MAX_INPROC_RESTARTS must be nonnegative")
+ 
+ parser = argparse.ArgumentParser()
+ parser.add_argument("--task_name", type=str)
+diff --git a/third_party/IsaacLab b/third_party/IsaacLab
+--- a/third_party/IsaacLab
++++ b/third_party/IsaacLab
+@@ -1 +1 @@
+-Subproject commit afca7b09d60d8beb9c1cb28b43066499940b969b
++Subproject commit afca7b09d60d8beb9c1cb28b43066499940b969b-dirty

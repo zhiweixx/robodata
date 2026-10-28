@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "sources": {
+    "robodojo": {"url": "https://github.com/RoboDojo-Benchmark/RoboDojo.git", "revision": "09bd5f5e762b949f5858ece31347ce62057b3a5e", "patch": "patches/robodojo.patch", "patch_sha256": "8cc46caa08c331f5a275acfe9f64d660d60fa419eb57d4b9e553285b71ec4cdb"},
+    "xpolicylab": {"url": "https://github.com/XPolicyLab/XPolicyLab.git", "revision": "53c5da5a01bc720d1cf0e6ab6ed212e8cef0eda2", "patch": "patches/xpolicylab.patch", "patch_sha256": "87b60f44c22b5c398f2a7497a265a784e4992a05f7ec0926f6c945a1d2d1a89b"},
+    "isaaclab": {"url": "https://github.com/yuechen0614/IsaacLab.git", "revision": "afca7b09d60d8beb9c1cb28b43066499940b969b", "patch": "patches/isaaclab.patch", "patch_sha256": "c05df6a4647ff2978f751eebce3dea63e222610747fb9db9452d7d974addf954"},
+    "curobo": {"url": "https://github.com/yuechen0614/curobo.git", "revision": "d17b54ce32cba095c0b000c4c58777075d11de0e"},
+    "sam3": {"url": "https://github.com/Max-Fu/sam3.git", "revision": "6fe87d64a5beb9084923d7a9e002741178635b09"},
+    "graspnet": {"url": "https://github.com/uynitsuj/contact_graspnet_pytorch.git", "revision": "da3dcfb2f53e43b186083ee4a9d1e232f73efc98"}
+  },
+  "assets": {"repo": "RoboDojo-Benchmark/RoboDojo", "revision": "35efbc7dedfdbeeb6e95fb749bd885d73d483e41", "repo_type": "dataset", "allow_patterns": ["Assets/**"]},
+  "sam3": {"repo": "facebook/sam3", "revision": "3c879f39826c281e95690f02c7821c4de09afae7", "files": {"config.json": "4616385e4b21f2e5e22c875b65679185cbccfa95de42542b9166f7dc3d57160f", "sam3.pt": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e"}},
+  "graspnet_checkpoint": {"relative_path": "contact_graspnet_pytorch/checkpoints/contact_graspnet/checkpoints/model.pt", "sha256": "39fc3439d5814043ba64e0715c127c2e8aca6ea376c22614e11af1bc89317762", "bytes": 26628146}
+}

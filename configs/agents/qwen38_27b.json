@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "name": "qwen38-27b-bf16-mtp3",
+  "model": {"repo": "Qwen/Qwen3.8-27B", "revision": "1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0"},
+  "inference": {"dtype": "bfloat16", "tensor_parallel_size": 2, "mtp_tokens": 3, "native_context_tokens": 262144, "max_num_seqs": 2, "model_seed": 0},
+  "sampling": {"temperature": 1.0, "top_p": 0.95, "top_k": 20, "min_p": 0.0, "presence_penalty": 0.0, "repetition_penalty": 1.0},
+  "thinking": {"enable_thinking": true, "preserve_thinking": false, "reasoning_effort": "medium"},
+  "limits": {"model_turn_cap": null, "output_token_cap": null, "episode_walltime_cap": null, "history_compaction": false},
+  "perception": {"sam3": true, "contact_graspnet": true, "offline_skill_discovery": false}
+}

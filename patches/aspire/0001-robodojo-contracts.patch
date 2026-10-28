@@ -1,0 +1,35 @@
+--- a/src/cap_harness/contracts.py
++++ b/src/cap_harness/contracts.py
+@@ -17,6 +17,7 @@
+         "behavior": 7,
+         "libero": 7,
+         "robosuite": 7,
++        "robodojo": 6,
+         "yam_real": 6,
+     }
+ )
+@@ -992,10 +993,10 @@
+         pose_planner = _non_empty_string(self.pose_planner, "pose_planner")
+         if ik_solver not in {"pyroki", "curobo", "mink"}:
+             raise ValueError("ik_solver must be 'pyroki', 'curobo', or 'mink'")
+-        if trajectory_planner not in {"interpolation", "curobo"}:
+-            raise ValueError("trajectory_planner must be 'interpolation' or 'curobo'")
+-        if pose_planner not in {"composed", "curobo-integrated"}:
+-            raise ValueError("pose_planner must be 'composed' or 'curobo-integrated'")
++        if trajectory_planner not in {"interpolation", "curobo", "robodojo-native"}:
++            raise ValueError("unsupported trajectory_planner")
++        if pose_planner not in {"composed", "curobo-integrated", "robodojo-native"}:
++            raise ValueError("unsupported pose_planner")
+         object.__setattr__(self, "ik_solver", ik_solver)
+         object.__setattr__(self, "trajectory_planner", trajectory_planner)
+         object.__setattr__(self, "pose_planner", pose_planner)
+--- a/src/cap_harness/registry.py
++++ b/src/cap_harness/registry.py
+@@ -80,6 +80,7 @@
+     "yam_real.",
+     "libero.",
+     "robosuite.",
++    "robodojo.",
+ )
+ 
+ _NAME_PATTERN = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*$")

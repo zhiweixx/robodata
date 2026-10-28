@@ -1,0 +1,13 @@
+RoboData
+Copyright 2026 RoboData contributors
+
+This project incorporates a modified runtime subset of NVIDIA ASPIRE.
+ASPIRE's original copyright, Apache-2.0 license and notices are retained under
+third_party/aspire. The modifications and their provenance are documented there
+and in patches/aspire. Dependencies, model weights, simulator software and assets
+retain their own licenses; the project license does not supersede those terms.
+
+The Contact-GraspNet method excerpt in
+tests/runtime/test_fixtures/cgn_postprocessing.py.txt is distributed under the
+NVIDIA Source Code License for Contact-GraspNet, including its non-commercial
+research/evaluation limitation. See deploy/notices/graspnet-LICENSE.txt.

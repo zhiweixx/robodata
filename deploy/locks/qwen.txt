@@ -1,0 +1,6 @@
+# Runtime-critical pins. The observed historical full freeze is retained separately.
+vllm==0.32.0
+transformers==5.16.1
+torch==2.13.0+cu130
+torchvision==0.28.0+cu130
+flashinfer-python==0.7.0.post1

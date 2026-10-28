@@ -1,0 +1,63 @@
+diff --git a/src/cap_harness/api.py b/src/cap_harness/api.py
+index 0b74fe3..956f921 100644
+--- a/src/cap_harness/api.py
++++ b/src/cap_harness/api.py
+@@ -946,10 +946 @@ class CapApi:
+-        if public.ok:
+-            if isinstance(trajectory, Trajectory):
+-                if trajectory.gripper_positions is not None:
+-                    self._commanded_gripper_positions[trajectory.arm] = float(
+-                        trajectory.gripper_positions[-1]
+-                    )
+-            elif trajectory.gripper_positions is not None:
+-                self._commanded_gripper_positions.update(
+-                    {arm: float(values[-1]) for arm, values in trajectory.gripper_positions.items()}
+-                )
++        self._remember_trajectory_gripper_commands(trajectory, public)
+@@ -1762,0 +1754,46 @@ class CapApi:
++    def _remember_trajectory_gripper_commands(
++        self,
++        trajectory: Trajectory | SynchronizedTrajectory,
++        result: ExecutionResult,
++    ) -> None:
++        if trajectory.gripper_positions is None:
++            return
++        grippers = (
++            {trajectory.arm: trajectory.gripper_positions}
++            if isinstance(trajectory, Trajectory)
++            else trajectory.gripper_positions
++        )
++        # Optional adapter capability: a fresh snapshot of the last commands
++        # actually issued, including commands issued before a later failure.
++        # Neither measured aperture nor steps_executed identifies these targets:
++        # contact can stop the jaws, and some adapters resample trajectory time.
++        read_commands = getattr(self._adapter, "get_commanded_gripper_positions", None)
++        if callable(read_commands):
++            try:
++                commands = read_commands()
++                if not isinstance(commands, Mapping) or set(commands) != set(
++                    trajectory.expected_start.arms
++                ):
++                    return
++                normalized = {}
++                for arm, value in commands.items():
++                    if isinstance(value, (bool, np.bool_)) or not isinstance(
++                        value, (int, float, np.integer, np.floating)
++                    ):
++                        return
++                    numeric = float(value)
++                    if not np.isfinite(numeric) or not 0.0 <= numeric <= 1.0:
++                        return
++                    normalized[arm] = numeric
++            except Exception:
++                # Broken optional evidence must not hide the execution result
++                # or be replaced with a guessed future/physical target.
++                return
++            self._commanded_gripper_positions.update({arm: normalized[arm] for arm in grippers})
++        elif result.ok:
++            # Preserve the original behavior for adapters without this optional
++            # command-evidence capability; partial execution remains unknown.
++            self._commanded_gripper_positions.update(
++                {arm: float(values[-1]) for arm, values in grippers.items()}
++            )
++

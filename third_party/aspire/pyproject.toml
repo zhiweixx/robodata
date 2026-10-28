@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cap-harness"
+version = "0.1.0"
+description = "Pinned ASPIRE runtime used by RoboData"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.10,<3.13"
+dependencies = ["numpy>=1.26,<3", "requests>=2.32", "scipy>=1.12", "PyYAML>=6"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+cap_harness = ["configs/**/*.yaml", "configs/**/*.json", "yam_real/description/**/*.xml", "yam_real/description/**/*.urdf", "yam_real/description/**/*.yml", "robodata_patches/*.patch"]

@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "name": "rtx-slurm-example",
+  "agent_config": "configs/agents/qwen38_27b.json",
+  "paths": {
+    "benchmark_root": "${ROBODATA_DATA}/sources/RoboDojo",
+    "assets_root": "${ROBODATA_DATA}/assets/Assets",
+    "isaac_container": "${ROBODATA_DATA}/containers/isaac-sim-6.0.0.sif",
+    "sim_venv": "${ROBODATA_DATA}/envs/simulator",
+    "model_snapshot": "${ROBODATA_DATA}/models/qwen38-27b",
+    "model_manifest": "${ROBODATA_DATA}/models/qwen38-27b.manifest.json",
+    "model_python": "${ROBODATA_DATA}/envs/qwen/bin/python",
+    "sam3_python": "${ROBODATA_DATA}/envs/sam3/bin/python",
+    "graspnet_python": "${ROBODATA_DATA}/envs/graspnet/bin/python",
+    "perception_runtime_manifest": "${ROBODATA_DATA}/perception/runtime_manifest.json",
+    "sam3_manifest": "${ROBODATA_DATA}/perception/sam3_manifest.json",
+    "perception_vendor_root": "${ROBODATA_DATA}/vendors",
+    "work_root": "${ROBODATA_DATA}/runs"
+  },
+  "resources": {
+    "model_gpu_indices": [
+      1,
+      2
+    ],
+    "simulator_gpu_index": 0,
+    "perception_gpu_index": 3
+  },
+  "container": {
+    "runtime": "apptainer",
+    "source": "docker://nvcr.io/nvidia/isaac-sim:6.0.0",
+    "extra_binds": [],
+    "accept_eula": false
+  },
+  "scheduler": {
+    "account": "REPLACE_WITH_ACCOUNT",
+    "partition": "REPLACE_WITH_RTX_PARTITION",
+    "gres": "gpu:l40s:4",
+    "cpus_per_task": 32,
+    "memory": "240G",
+    "time": "24:00:00",
+    "max_concurrent_shards": 8
+  },
+  "setup": {
+    "python": "3.12.13",
+    "cuda_arch_list": "8.9"
+  }
+}

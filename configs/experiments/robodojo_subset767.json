@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "name": "robodojo-subset767-perception",
+  "manifest": "experiments/manifests/robodojo_subset767.json",
+  "agent_config": "configs/agents/qwen38_27b.json",
+  "harness": "ASPIRE API/executor with custom ARX X5 native CuRobo bridge and six reviewed fixes",
+  "online_perception": ["SAM3", "Contact-GraspNet"],
+  "offline_skill_discovery": false,
+  "native_group_count": 51,
+  "task_family_count": 40,
+  "target_scored_episodes": 767,
+  "excluded_families": ["general_pickup", "stack_bowls"],
+  "reuse_historical_results": false,
+  "is_official_full_evaluation": false,
+  "sharding": "whole native configuration groups; one exclusive owner per group",
+  "reference_topology": "one Slurm replica with four compatible GPUs; simulator requires RTX"
+}
