@@ -1,5 +1,10 @@
 # RoboData
 
+For the deployed **Qwen API / GPT Terra / GPT Astra** code before the next major
+revision, start with the [2026-10-31 source snapshot](docs/API_EVAL_SNAPSHOT_20261031.md).
+It links the exact operational source, dated Git tag, and private research datasets.
+The package and quickstart below describe the separately migrated portable runtime.
+
 Infrastructure for robot data collection and evaluation. The current pipeline runs
 **Qwen3.8-27B code policies on RoboDojo**, using the ASPIRE API/program executor,
 a custom ARX X5/native CuRobo bridge, SAM3 segmentation, and Contact-GraspNet grasp
