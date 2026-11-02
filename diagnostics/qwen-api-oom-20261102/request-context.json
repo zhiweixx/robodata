@@ -1,0 +1,50 @@
+{
+  "interpretation": {
+    "local_cgroup_oom_events": 0,
+    "local_ram_guard_triggered": false,
+    "other_api_users_causal_role": "unknown",
+    "owner_of_reported_gpu_process": "unknown",
+    "remote_cuda_oom_confirmed": true,
+    "server_batch_size": "unknown"
+  },
+  "previous_completed_request": {
+    "completion_tokens": 2888,
+    "iteration": 10,
+    "not_the_failed_request_usage": true,
+    "prompt_tokens": 60919
+  },
+  "privacy": {
+    "credentials_included": false,
+    "private_filesystem_paths_included": false,
+    "private_hosts_included": false,
+    "request_prompts_images_or_generated_programs_included": false
+  },
+  "request": {
+    "api_path": "/v1/chat/completions",
+    "automatic_retries": 0,
+    "client_failure_recorded_utc": "2026-11-02T07:04:53.834889+00:00",
+    "client_inflight_at_request_start": 6,
+    "client_output_cap": null,
+    "concurrency_scope": "Client HTTP requests in flight; not measured server batch size",
+    "episode_id": "fill_pen_holder_s0_l0",
+    "full_request_published": false,
+    "historical_image_block_count": 33,
+    "iteration": 11,
+    "method": "POST",
+    "model": "qwen38-27b",
+    "public_history_message_count": 22,
+    "request_sha256": "5c6a45957217d1faef633ff2eb86e0531a4ff87af64e821ec38afeb052f15e74",
+    "started_detroit": "2026-11-02T02:04:25.820681-05:00",
+    "started_utc": "2026-11-02T07:04:25.820681+00:00"
+  },
+  "response": {
+    "bytes": 797,
+    "failed_request_token_usage": null,
+    "file": "response.json",
+    "http_status": 500,
+    "raw_body_unchanged": true,
+    "sha256": "b1c5f825d268fb8f613a1404ac6cb05a124dd95c8ae8c3a5ce2f0d2a00ba5c10"
+  },
+  "schema_version": 1,
+  "source": "saved client request/response records; no new API call"
+}

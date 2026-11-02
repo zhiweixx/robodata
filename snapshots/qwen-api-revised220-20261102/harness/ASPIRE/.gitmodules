@@ -1,0 +1,18 @@
+[submodule "third_party/LIBERO-PRO"]
+	path = third_party/LIBERO-PRO
+	url = https://github.com/uynitsuj/LIBERO-PRO.git
+[submodule "third_party/robosuite"]
+	path = third_party/robosuite
+	url = https://github.com/Max-Fu/robosuite
+[submodule "third_party/contact_graspnet_pytorch"]
+	path = third_party/contact_graspnet_pytorch
+	url = https://github.com/uynitsuj/contact_graspnet_pytorch
+[submodule "third_party/sam3"]
+	path = third_party/sam3
+	url = https://github.com/Max-Fu/sam3.git
+[submodule "third_party/curobo"]
+	path = third_party/curobo
+	url = https://github.com/NVlabs/curobo.git
+[submodule "third_party/BEHAVIOR-1K"]
+	path = third_party/BEHAVIOR-1K
+	url = https://github.com/StanfordVL/BEHAVIOR-1K.git

@@ -1,0 +1,24 @@
+# Runtime evidence and downloaded artifacts live on Lighthouse, outside source control.
+__pycache__/
+*.py[cod]
+.DS_Store
+.venv/
+.env
+.env.*
+!.env.example
+.secrets/
+*.key
+*.pem
+*.log
+*.tar
+*.tar.gz
+*.zip
+*.mp4
+/debug/
+/results/
+/full_results/
+/qwen_runtime/runs/
+/qwen_runtime/gpus-*.csv
+/qwen_full/analysis/
+/qwen_full/drain_*.json
+/.git-publish-inventory.json

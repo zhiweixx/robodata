@@ -1,5 +1,10 @@
 # RoboData
 
+The [2026-11-02 revised Qwen API source snapshot](snapshots/qwen-api-revised220-20261102/README.md)
+and [one saved API CUDA OOM response](diagnostics/qwen-api-oom-20261102/README.md)
+are available on this archival branch. Private site bindings and experiment data
+are excluded; the operational evaluation was not changed by this publication.
+
 For the deployed **Qwen API / GPT Terra / GPT Astra** code before the next major
 revision, start with the [2026-10-31 source snapshot](docs/API_EVAL_SNAPSHOT_20261031.md).
 It links the exact operational source, dated Git tag, and private research datasets.
