@@ -24,6 +24,13 @@ TEMPLATE_FLAGS = dict(enable_thinking=False, preserve_thinking=True, add_generat
 IGNORE, ACTION, OUTCOME = 0, 1, 2
 ROLE_IDS = {"ignore": IGNORE, "action": ACTION, "outcome": OUTCOME}
 ASSISTANT_HEADER = "<|im_start|>assistant\n<think>\n\n</think>\n\n"
+EXCLUDED_LENGTHS = {
+    "imitate_sorting_sequence_s0_l0": 270_194,
+    "imitate_sorting_sequence_s0_l1": 361_556,
+    "imitate_sorting_sequence_s0_l2": 293_154,
+    "imitate_sorting_sequence_s0_l3": 269_075,
+    "make_toast_s0_l2": 270_923,
+}
 
 
 def _sha(data: bytes) -> str:
@@ -292,9 +299,62 @@ def encode_all(prepared_dir, model_path):
                     context_ready=not over, over_limit=over, counts=counts, rows=rows)
     manifest["fingerprint"] = _sha(_canonical(manifest))
     _write_json(root / "manifest.json", manifest)
-    if over:
-        raise ValueError(f"full episodes exceed {CONTEXT_LIMIT} tokens: {over}; see length_report.json")
-    return manifest
+    return select_eligible(root)
+
+
+def eligible_manifest(prepared_dir):
+    """Apply the five measured, ID-specific exclusions to the verified full manifest."""
+    root = Path(prepared_dir)
+    raw = (root / "manifest.json").read_bytes()
+    full = json.loads(raw)
+    fingerprint = full.pop("fingerprint")
+    if _sha(_canonical(full)) != fingerprint or full["model_revision"] != MODEL_REVISION:
+        raise ValueError("Prepared manifest fingerprint or model revision mismatch")
+    if full["over_limit"] != EXCLUDED_LENGTHS:
+        raise ValueError(f"Unapproved overlength set: {full['over_limit']}")
+    if full["context_limit"] != CONTEXT_LIMIT or full["context_ready"] is not False:
+        raise ValueError("Unexpected full-release context gate")
+    rows = full["rows"]
+    split = json.loads(Path(__file__).with_name("split_manifest.json").read_bytes())["states"]
+    expected_ids = {sid for sid, state in split.items() if state["split"] != "unscored"}
+    if len(rows) != len(expected_ids) or {r["episode_id"] for r in rows} != expected_ids:
+        raise ValueError("Full manifest differs from the pinned scored states")
+    lengths = {r["episode_id"]: r["seq_length"] for r in rows}
+    report = json.loads((root / "length_report.json").read_bytes())
+    measured = {sid: length for sid, length in lengths.items() if length > CONTEXT_LIMIT}
+    if measured != EXCLUDED_LENGTHS or report != dict(context_limit=CONTEXT_LIMIT,
+            over_limit=measured, lengths=lengths, max_length=max(lengths.values())):
+        raise ValueError("Full manifest and measured length report disagree with authorized exclusions")
+    excluded = []
+    retained = []
+    for row in rows:
+        episode = row["episode_id"]
+        pinned = split[episode]
+        if (row["split"] != pinned["split"] or row["success"] is not pinned["success"]
+                or row["semantic_state_sha256"] != pinned["semantic_state_sha256"]):
+            raise ValueError(f"{episode}: physical state, split, or outcome changed")
+        if episode in EXCLUDED_LENGTHS:
+            if row["success"] or row["termination_reason"] != "environment_ended" or row["action_tokens"]:
+                raise ValueError(f"{episode}: unexpected overlong result or supervision")
+            excluded.append({k: row[k] for k in ("episode_id", "split", "seq_length", "semantic_state_sha256")})
+        else:
+            retained.append(row)
+    counts = {}
+    for subset in ("train", "heldout"):
+        group = [r for r in retained if r["split"] == subset]
+        counts[subset] = {k: sum(r[k] for r in group) for k in full["counts"][subset] if k != "episodes"}
+        counts[subset]["episodes"] = len(group)
+    result = dict(full, schema_version=2, rows=retained, counts=counts, context_ready=True, over_limit={},
+                  excluded=excluded, full_manifest_sha256=_sha(raw), full_fingerprint=fingerprint)
+    result["fingerprint"] = _sha(_canonical(result))
+    return result
+
+
+def select_eligible(prepared_dir):
+    """Publish a sidecar using existing encodings, leaving all 217 records in place."""
+    result = eligible_manifest(prepared_dir)
+    _write_json(Path(prepared_dir) / "eligible_manifest.json", result)
+    return result
 
 
 def load_episode(prepared_dir, row, processor):

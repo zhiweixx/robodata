@@ -11,12 +11,12 @@ from robodata.sft.run_io import atomic, write_json
 
 
 def test_exact_epoch_and_warmup():
-    rows = [dict(episode_id=f's{i}', action_tokens=int(i < 46)) for i in range(205)]
+    rows = [dict(episode_id=f's{i}', action_tokens=int(i < 46)) for i in range(201)]
     groups = policy.make_groups(rows)
     assert groups == policy.make_groups(rows[::-1])
-    assert [len(g) for g in groups] == [8] * 25 + [5]
+    assert [len(g) for g in groups] == [8] * 25 + [1]
     assert all(sum(r['action_tokens'] for r in g) >= 1 for g in groups)
-    assert len({r['episode_id'] for g in groups for r in g}) == 205
+    assert len({r['episode_id'] for g in groups for r in g}) == 201
     assert [policy.learning_rate(i, 26) for i in (1, 2, 26)] == [2.5e-5, 5e-5, 5e-6]
 
 
@@ -44,6 +44,48 @@ def test_failed_checkpoint_write_preserves_committed_bytes(tmp_path):
         atomic(path, interrupted)
     assert list(tmp_path.iterdir()) == [path]
     assert path.read_bytes() == b'original'
+
+
+def test_only_the_five_measured_overlength_states_are_removed(tmp_path):
+    from robodata.sft.encoding import CONTEXT_LIMIT, EXCLUDED_LENGTHS, select_eligible
+    split = json.loads(Path(policy.__file__).with_name('split_manifest.json').read_bytes())['states']
+    rows = [dict(episode_id=sid, seq_length=EXCLUDED_LENGTHS.get(sid, 2000),
+                 termination_reason='environment_ended', action_tokens=int(s['success']), **s)
+            for sid, s in split.items() if s['split'] != 'unscored']
+    lengths = {r['episode_id']: r['seq_length'] for r in rows}
+    manifest = dict(context_limit=CONTEXT_LIMIT, model_revision=policy.BASE_REVISION, context_ready=False,
+                    over_limit=EXCLUDED_LENGTHS, rows=rows, counts={'train': {}, 'heldout': {}})
+    manifest['fingerprint'] = hashlib.sha256(
+        json.dumps(manifest, separators=(',', ':'), sort_keys=True).encode()).hexdigest()
+    original = tmp_path / 'manifest.json'
+    write_json(original, manifest)
+    before = original.read_bytes()
+    report = dict(context_limit=CONTEXT_LIMIT, over_limit=EXCLUDED_LENGTHS, lengths=lengths,
+                  max_length=max(lengths.values()))
+    write_json(tmp_path / 'length_report.json', report)
+    selected = select_eligible(tmp_path)
+    assert original.read_bytes() == before
+    assert selected['full_manifest_sha256'] == hashlib.sha256(before).hexdigest()
+    assert selected['rows'] == [r for r in rows if r['episode_id'] not in EXCLUDED_LENGTHS]
+    assert selected['counts'] == {'train': {'episodes': 201}, 'heldout': {'episodes': 11}}
+    lengths['imitate_sorting_sequence_s0_l0'] -= 1
+    write_json(tmp_path / 'length_report.json', report)
+    with pytest.raises(ValueError, match='measured length'):
+        select_eligible(tmp_path)
+
+
+def test_validation_uses_seven_failures_and_three_natural_failures():
+    rows = []
+    for success, reason, count in [(True, 'environment_ended', 4), (False, 'model_give_up', 4),
+                                   (False, 'environment_ended', 3)]:
+        for _ in range(count):
+            rows.append(dict(success=success, termination_reason=reason, pred_success=reason != 'model_give_up',
+                             action_tokens=int(success), outcome_tokens=2, action_nll_sum=float(success),
+                             outcome_nll_sum=2., binary_nll=1.))
+    summary = training._validation_summary(rows)
+    assert summary['val/episodes'] == 11 and summary['val/natural_failure_total'] == 3
+    assert summary['val/TP'] == 4 and summary['val/TN'] == 4
+    assert summary['val/binary_nll'] == 1. and summary['val/balanced_accuracy'] == pytest.approx(0.5 * (1 + 4/7))
 
 
 def test_sparse_two_episode_backward_matches_dense_token_weighting():

@@ -6,7 +6,7 @@ def add_sft_parser(subparsers):
     parser = subparsers.add_parser("sft", help="prepare, train and evaluate full-episode LoRA")
     stages = parser.add_subparsers(dest="sft_command", required=True)
     prepare = stages.add_parser("prepare", help="verify the release and encode complete episodes on CPU")
-    prepare.add_argument("--stage", choices=("all", "reconstruct", "encode"), default="all")
+    prepare.add_argument("--stage", choices=("all", "reconstruct", "encode", "select"), default="all")
     prepare.add_argument("--dataset-dir", type=Path, help="local snapshot of the pinned HF release")
     prepare.add_argument("--prepared-dir", type=Path, required=True, help="external working directory")
     prepare.add_argument("--model-path", type=Path, help="local snapshot of the pinned base model")
@@ -24,6 +24,11 @@ def run_sft(args):
     prepared = args.prepared_dir.expanduser().resolve()
     model = args.model_path.expanduser().resolve() if args.model_path else None
     if args.sft_command == "prepare":
+        if args.stage == "select":
+            from robodata.sft.encoding import select_eligible
+            manifest = select_eligible(prepared)
+            return {"manifest": str(prepared / "eligible_manifest.json"), "fingerprint": manifest["fingerprint"],
+                    "counts": manifest["counts"], "excluded": manifest["excluded"]}
         if args.stage != "reconstruct" and model is None:
             raise ValueError("--model-path is required for encoding")
         if args.stage != "encode":

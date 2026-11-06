@@ -4,8 +4,18 @@ This experiment uses 217 complete, natively scored teacher episodes from
 `robodata-lab/robodojo-gpt6-astra-revised-220-20261101` at
 `7df93dc28f4e0495812bad917eed6432360f960d`. The other three physical
 states have no native label. The committed split binds episode IDs to physical
-states. It has 205 training episodes (46 successful) and 12 held-out layouts
-(4 successful).
+states. The full manifest contains 205 training episodes and 12 held-out layouts.
+The eligible manifest retains 201 complete training episodes (46 successful)
+and 11 complete held-out layouts (4 successful). Five scored failures exceed
+the pinned model's 262,144-position context:
+
+| Episode | Split | Expanded tokens |
+|---|---|---:|
+| `imitate_sorting_sequence_s0_l0` | train | 270,194 |
+| `imitate_sorting_sequence_s0_l1` | train | 361,556 |
+| `imitate_sorting_sequence_s0_l2` | train | 293,154 |
+| `imitate_sorting_sequence_s0_l3` | train | 269,075 |
+| `make_toast_s0_l2` | held out | 270,923 |
 
 ## Prepare on CPU
 
@@ -24,16 +34,26 @@ For staging on separate machines, run `prepare --stage reconstruct` with
 `--dataset-dir` and `--prepared-dir`. Transfer the verified prepared directory,
 then run `prepare --stage encode` with `--prepared-dir` and `--model-path`.
 The final `length_report.json` lists expanded Qwen token counts for each full
-episode. Any count above 262,144 blocks training. Check `manifest.json` and
-its data fingerprint before taking the GPU out of service.
+episode. `manifest.json` keeps all 217 encoded episodes. The selector verifies
+the exact five IDs and lengths above against both full-release records and writes
+`eligible_manifest.json`. All 212 retained rows reference their original arrays,
+image references and split. Any change to the excluded set or its lengths blocks
+training. To reuse a previously verified 217-episode encoding, run:
+
+```bash
+robodata sft prepare --stage select --prepared-dir "$PREPARED"
+```
+
+Check the eligible manifest's fingerprint and counts before taking the GPU
+out of service. The training entry point rechecks its derivation.
 
 Every episode contains its ordered observations, camera images and public
 teacher replies. A final public-feedback query asks for `success` or
 `failure`. Native labels enter only as the answer. The action mask covers valid
 actions from successful episodes, with the known execution error removed.
 Failed actions and ignored replies stay visible in the causal prefix.
-The training split has 603 supervised actions and 205 outcome replies. The
-held-out split has 83 supervised actions and 12 outcome replies. Each target
+The training split has 603 supervised actions and 201 outcome replies. The
+held-out split has 83 supervised actions and 11 outcome replies. Each target
 includes its own end-of-message token.
 
 ## Train and evaluate
@@ -75,7 +95,7 @@ separates successful layouts, natural failures and give-up failures. Measuring
 robot task success requires separate simulator rollouts.
 
 On this split, predicting failure for every visible give-up and success
-otherwise gives 8/12 correct and 0.75 balanced accuracy. Use the four
+otherwise gives 8/11 correct and 0.786 balanced accuracy. Use the three
 naturally ended failures to check what the adapter learns beyond that signal.
 
 W&B writes offline to the run directory under project `robodojo-qwen-sft`.

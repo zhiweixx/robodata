@@ -1,7 +1,6 @@
 """One-epoch multimodal LoRA SFT on complete RoboDojo episodes (experiment B)."""
 import contextlib
 import gc
-import hashlib
 import importlib.metadata
 import json
 import os
@@ -16,17 +15,11 @@ from robodata.sft.run_io import OfflineMetrics, atomic, locked, read_json, sha25
 
 
 def _dataset(prepared):
-    manifest = read_json(prepared / 'manifest.json')
-    fingerprint = dict(manifest)
-    digest = fingerprint.pop('fingerprint')
-    serialized = json.dumps(fingerprint, ensure_ascii=False, sort_keys=True, separators=(',', ':'),
-                            allow_nan=False).encode()
-    if hashlib.sha256(serialized).hexdigest() != digest or manifest['model_revision'] != policy.BASE_REVISION:
-        raise ValueError('Prepared manifest fingerprint or model revision mismatch')
-    if manifest.get('context_ready') is not True or manifest.get('over_limit'):
-        raise ValueError(f"Preparation context gate failed: {manifest.get('over_limit')}")
-    if manifest['context_limit'] != 262144:
-        raise ValueError('Unexpected context limit')
+    from robodata.sft.encoding import eligible_manifest
+    expected_manifest = eligible_manifest(prepared)
+    manifest = read_json(prepared / 'eligible_manifest.json')
+    if manifest != expected_manifest:
+        raise ValueError('Eligible manifest differs from the verified full release and five exclusions')
     rows = manifest['rows']
     from robodata.sft.encoding import PROCESSOR_HASHES, TEMPLATE_FLAGS
     split_file = Path(__file__).with_name('split_manifest.json')
@@ -38,8 +31,8 @@ def _dataset(prepared):
             or manifest['template_flags'] != TEMPLATE_FLAGS or manifest['processor_hashes'] != PROCESSOR_HASHES):
         raise ValueError('Dataset release, split, processor or template fingerprint mismatch')
     pinned = release['states']
-    if len(rows) != 217 or len({r['episode_id'] for r in rows}) != 217:
-        raise ValueError('Expected 217 unique scored states')
+    if len(rows) != 212 or len({r['episode_id'] for r in rows}) != 212:
+        raise ValueError('Expected 212 unique retained states')
     for row in rows:
         expected = pinned[row['episode_id']]
         if (row['split'] != expected['split'] or row['success'] is not expected['success']
@@ -53,7 +46,7 @@ def _dataset(prepared):
     val = [r for r in rows if r['split'] == 'heldout']
     counts = tuple((len(s), sum(r['success'] for r in s), sum(r['action_turns'] for r in s))
                    for s in (train, val))
-    if counts != ((205, 46, 603), (12, 4, 83)):
+    if counts != ((201, 46, 603), (11, 4, 83)):
         raise ValueError(f'Unexpected split counts: {counts}')
     return manifest, train, val
 
@@ -72,7 +65,8 @@ def _identity(prepared, model_dir, fingerprint):
             ('policy.py', 'training.py', 'run_io.py', 'encoding.py', 'weight_hashes.json', 'split_manifest.json')}
     versions = {n: importlib.metadata.version(n) for n in ('torch', 'transformers', 'peft', 'wandb', 'fla-core', 'accelerate')}
     return {
-        'manifest_sha256': sha256(prepared / 'manifest.json'), 'data_fingerprint': fingerprint,
+        'manifest_sha256': sha256(prepared / 'eligible_manifest.json'), 'data_fingerprint': fingerprint,
+        'full_manifest_sha256': sha256(prepared / 'manifest.json'),
         'model_index_sha256': pinned['index_sha256'],
         'base_revision': policy.BASE_REVISION, 'dataset_revision': policy.DATA_REVISION,
         'code_sha256': code, 'versions': versions, 'seed': policy.SEED,
@@ -238,9 +232,12 @@ def _check_gpu(model, prepared, rows, processor, run, identity):
     result = {'identity': identity, 'passed': False, 'longest_episode': longest['episode_id'],
               'longest_seq_length': longest['seq_length'], 'attempts': []}
     try:
+        print(f"Checking sparse and dense loss on {short['episode_id']} ({short['seq_length']} tokens)", flush=True)
         result['short_comparison'] = _sdpa_check(model, prepared, processor, short)
         model.train()
         for offload in (False, True):
+            print(f"Checking longest training episode {longest['episode_id']} "
+                  f"({longest['seq_length']} tokens, activation offload={offload})", flush=True)
             _clear()
             torch.cuda.reset_peak_memory_stats()
             ok = False
@@ -330,7 +327,9 @@ def _update(model, processor, prepared, optimizer, params, group, step, total_st
     torch.cuda.reset_peak_memory_stats()
     started = time.monotonic()
     action_sum = outcome_sum = 0.
-    for row in group:
+    for i, row in enumerate(group, 1):
+        print(f"Update {step}/{total_steps}, episode {i}/{len(group)}: "
+              f"{row['episode_id']} ({row['seq_length']} tokens)", flush=True)
         a, o = _episode_backward(model, prepared, processor, row, (a_tokens, o_tokens), offload)
         action_sum += a
         outcome_sum += o
@@ -357,11 +356,11 @@ def _epoch(metrics):
     def total(k):
         return sum(r['train/' + k] for r in metrics)
     if len(metrics) != 26 or (metrics[-1]['train/episodes_seen'], total('action_turns'), total('outcome_turns')) != (
-            205, 603, 205):
+            201, 603, 201):
         raise ValueError('Training epoch is incomplete')
     a, o = total('action_nll_sum') / total('action_tokens'), total('outcome_nll_sum') / total('outcome_tokens')
     return {'epoch/action_nll': a, 'epoch/outcome_nll': o, 'epoch/loss': a + policy.OUTCOME_WEIGHT * o,
-            'epoch/episodes': 205, 'epoch/action_turns': 603, 'epoch/outcome_turns': 205,
+            'epoch/episodes': 201, 'epoch/action_turns': 603, 'epoch/outcome_turns': 201,
             'epoch/action_tokens': total('action_tokens'), 'epoch/outcome_tokens': total('outcome_tokens'),
             'epoch/updates': len(metrics)}
 
@@ -424,6 +423,13 @@ def _evaluate(prepared, model_dir, run, rows, processor, identity):
                 del kwargs, pos, roles, a, o
                 write_json(path, item)
         decisions.append(item)
+    summary = _validation_summary(decisions)
+    write_json(val_path, {'identity': identity, 'adapter_sha256': digest, 'summary': summary,
+                          'episodes': decisions})
+    return summary
+
+
+def _validation_summary(decisions):
     confusion = {k: 0 for k in ('TP', 'FN', 'TN', 'FP')}
     subsets = {'success': [0, 0], 'give_up_failure': [0, 0], 'natural_failure': [0, 0]}
     for item in decisions:
@@ -434,7 +440,7 @@ def _evaluate(prepared, model_dir, run, rows, processor, identity):
                                            else 'natural_failure')
         subsets[subset][0] += int(truth == predicted)
         subsets[subset][1] += 1
-    if any(x[1] != 4 for x in subsets.values()):
+    if {k: v[1] for k, v in subsets.items()} != {'success': 4, 'give_up_failure': 4, 'natural_failure': 3}:
         raise ValueError(f'Unexpected held-out subtype counts: {subsets}')
     summary = {f'val/{k}': v for k, v in confusion.items()}
     for name, (correct, count) in subsets.items():
@@ -444,11 +450,10 @@ def _evaluate(prepared, model_dir, run, rows, processor, identity):
         return sum(item[k] for item in decisions)
     summary.update({'val/action_nll': total('action_nll_sum') / total('action_tokens'),
                     'val/outcome_nll': total('outcome_nll_sum') / total('outcome_tokens'),
-                    'val/binary_nll': total('binary_nll') / 12,
-                    'val/balanced_accuracy': 0.5 * (confusion['TP'] / 4 + confusion['TN'] / 8),
-                    'val/episodes': 12, 'val/action_turns': 83, 'val/outcome_turns': 12})
-    write_json(val_path, {'identity': identity, 'adapter_sha256': digest, 'summary': summary,
-                          'episodes': decisions})
+                    'val/binary_nll': total('binary_nll') / len(decisions),
+                    'val/balanced_accuracy': 0.5 * (confusion['TP'] / (confusion['TP'] + confusion['FN']) +
+                                                    confusion['TN'] / (confusion['TN'] + confusion['FP'])),
+                    'val/episodes': len(decisions), 'val/action_turns': 83, 'val/outcome_turns': len(decisions)})
     return summary
 
 
@@ -506,7 +511,8 @@ def train(prepared_dir, model_path, run_dir, *, resume=False):
                 _checkpoint(run, model, optimizer, step, groups, history, ident)
                 write_metrics(run, history)
                 metrics.update(update)
-                print(f'Committed update {step}/26 ({update["train/episodes_seen"]}/205 episodes)', flush=True)
+                print(f'Committed update {step}/{len(groups)} ({update["train/episodes_seen"]}/{len(rows)} episodes)',
+                      flush=True)
             epoch = _epoch(history)
             write_json(run / 'epoch.json', epoch)
             _save_final(run, model, ident)
