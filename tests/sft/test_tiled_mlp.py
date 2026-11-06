@@ -23,6 +23,10 @@ def test_tiled_mlp_preserves_parameters_outputs_and_gradients():
     assert list(tiled.state_dict()) == list(native.state_dict())
     assert all(param is parameters[name] for name, param in tiled.named_parameters())
 
+    gate_shapes = []
+    tiled.gate_proj.register_forward_pre_hook(
+        lambda module, inputs: gate_shapes.append(inputs[0].shape[-2]))
+
     for track_input_grad in (True, False):
         x = torch.randn(1, 25, 32, requires_grad=track_input_grad)
         xt = x.detach().clone().requires_grad_(track_input_grad)
@@ -48,5 +52,8 @@ def test_tiled_mlp_preserves_parameters_outputs_and_gradients():
         native.zero_grad(set_to_none=True)
         tiled.zero_grad(set_to_none=True)
 
+    assert gate_shapes and set(gate_shapes) == {7}
+    gate_shapes.clear()
     with torch.inference_mode():
         torch.testing.assert_close(tiled(x), native(x), rtol=2e-5, atol=1e-6)
+    assert gate_shapes == [7, 7, 7, 7]

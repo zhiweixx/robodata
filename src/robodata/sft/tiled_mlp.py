@@ -22,11 +22,17 @@ def tile_language_mlp(module, tile_size=FFN_TILE_SIZE):
             return forward(x)
         outputs = []
         for tile in x.split(tile_size, dim=-2):
+            valid = tile.shape[-2]
+            # Keep the GEMM row dimension constant. A short tail can select a
+            # different BF16 kernel exactly where the final verdict is read.
+            if valid < tile_size:
+                tile = torch.nn.functional.pad(tile, (0, 0, 0, tile_size - valid))
             if torch.is_grad_enabled():
                 # Nonreentrant checkpoint also works when x is frozen and LoRA alone requires grad.
-                outputs.append(checkpoint(forward, tile, use_reentrant=False))
+                out = checkpoint(forward, tile, use_reentrant=False)
             else:
-                outputs.append(forward(tile))
+                out = forward(tile)
+            outputs.append(out[..., :valid, :] if valid < tile_size else out)
         return torch.cat(outputs, dim=-2)
 
     module.forward = tiled

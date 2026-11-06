@@ -72,7 +72,7 @@ def _identity(prepared, model_dir, fingerprint):
         'model_index_sha256': pinned['index_sha256'],
         'base_revision': policy.BASE_REVISION, 'dataset_revision': policy.DATA_REVISION,
         'code_sha256': code, 'versions': versions, 'seed': policy.SEED,
-        'ffn_tile_tokens': FFN_TILE_SIZE, 'cpu_activation_offload': True,
+        'ffn_tile_tokens': FFN_TILE_SIZE, 'ffn_pad_partial_tile': True, 'cpu_activation_offload': True,
         'rank': 16, 'alpha': 32, 'dropout': 0, 'batch_size': 8,
         'outcome_weight': 0.25, 'epoch_count': 1, 'max_lr': 5e-5, 'min_lr': 5e-6,
         'warmup_updates': 2, 'weight_decay': 0, 'gradient_clip': 1.0,

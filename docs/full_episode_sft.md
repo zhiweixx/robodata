@@ -86,7 +86,10 @@ Each training episode contributes once, across 26 AdamW updates. Gradient
 checkpointing and computing vocabulary logits only at the predecessors of
 labelled positions keep the full multimodal causal prefix intact.
 
-Each language feed-forward layer processes up to 1,024 positions at a time.
+Each language feed-forward layer processes tiles of 1,024 positions. A
+partial final tile is zero-padded inside the positionwise feed-forward layer to
+use the same GEMM row count. Its padded outputs are discarded before returning
+to the decoder; the original positions, attention mask and loss remain intact.
 These projections act independently at each position. Attention still spans
 the full causal history. Training recomputes each feed-forward block during
 backpropagation and offloads saved activations to CPU memory. Tiling can
