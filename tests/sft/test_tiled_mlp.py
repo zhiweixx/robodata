@@ -57,3 +57,20 @@ def test_tiled_mlp_preserves_parameters_outputs_and_gradients():
     with torch.inference_mode():
         torch.testing.assert_close(tiled(x), native(x), rtol=2e-5, atol=1e-6)
     assert gate_shapes == [7, 7, 7, 7]
+
+
+def test_short_gate_accepts_equal_losses_and_gradients(monkeypatch):
+    torch = pytest.importorskip("torch")
+    from robodata.sft import training
+
+    model = torch.nn.Linear(2, 2, bias=False)
+    row = {"episode_id": "short", "action_tokens": 5, "outcome_tokens": 2, "seq_length": 8}
+
+    def equal_pass(model, *_args):
+        model.weight.grad = torch.ones_like(model.weight)
+        return 4.0, 2.0
+
+    monkeypatch.setattr(training, "_episode_backward", equal_pass)
+    monkeypatch.setattr(training, "tile_qwen_language_ffns", lambda _: None)
+    result = training._short_ffn_check(model, None, None, row)
+    assert result["passed"] and result["gradient_relative_l2"] == 0
