@@ -91,7 +91,11 @@ projection weights occupy 31.875 GiB. Training stores these weights in host
 RAM and copies each weight to the H200 for its native full-sequence linear
 operation. Backpropagation stages the same immutable weight again if its
 input gradient needs it. LoRA parameters and gradients stay on the H200.
-The same placement applies to the reloaded adapter during evaluation.
+The adapter matrices and their optimizer state use FP32. PyTorch autocast
+executes their linear operations in BF16. During both forward and checkpoint
+recomputation, PEFT's `disable_input_dtype_casting` avoids expanding each
+BF16 input to FP32 immediately before that operation. The reloaded adapter
+uses the same weight placement and compute policy for evaluation.
 
 The CPU regression compares the native Qwen MLP with the staged version,
 including all six adapter gradients and the input gradient. On the H200,

@@ -10,6 +10,7 @@ import pytest
 def test_native_weights_forward_and_all_adapters(checkpointed, input_grad):
     torch = pytest.importorskip("torch")
     peft = pytest.importorskip("peft")
+    from peft.helpers import disable_input_dtype_casting
     qwen = pytest.importorskip("transformers.models.qwen3_5.modeling_qwen3_5")
     from torch.utils.checkpoint import checkpoint
     from transformers.models.qwen3_5.configuration_qwen3_5 import Qwen3_5TextConfig
@@ -32,15 +33,16 @@ def test_native_weights_forward_and_all_adapters(checkpointed, input_grad):
 
     x = torch.randn(1, 43, 64, dtype=torch.bfloat16).requires_grad_(input_grad)
     xs = x.detach().clone().requires_grad_(input_grad)
-    with torch.autocast("cpu", torch.bfloat16):
-        expected = checkpoint(resident, x, use_reentrant=False) if checkpointed else resident(x)
-        # Exercise the same nesting as the outer activation offload and inner layer checkpoint.
-        with torch.autograd.graph.saved_tensors_hooks(lambda t: t.detach(), lambda t: t):
-            actual = checkpoint(staged, xs, use_reentrant=False) if checkpointed else staged(xs)
-    torch.testing.assert_close(actual, expected, rtol=0, atol=0)
-    upstream = torch.randn_like(actual)
-    expected.backward(upstream)
-    actual.backward(upstream)
+    with disable_input_dtype_casting(staged):
+        with torch.autocast("cpu", torch.bfloat16):
+            expected = checkpoint(resident, x, use_reentrant=False) if checkpointed else resident(x)
+            # Exercise the same nesting as the outer activation offload and inner layer checkpoint.
+            with torch.autograd.graph.saved_tensors_hooks(lambda t: t.detach(), lambda t: t):
+                actual = checkpoint(staged, xs, use_reentrant=False) if checkpointed else staged(xs)
+        torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+        upstream = torch.randn_like(actual)
+        expected.backward(upstream)
+        actual.backward(upstream)
     if input_grad:
         torch.testing.assert_close(xs.grad, x.grad, rtol=0, atol=0)
     assert list(staged.state_dict()) == list(resident.state_dict())
@@ -52,7 +54,7 @@ def test_native_weights_forward_and_all_adapters(checkpointed, input_grad):
             torch.testing.assert_close(other.grad, param.grad, rtol=0, atol=0)
         else:
             assert param.grad is None and other.grad is None
-    with torch.inference_mode(), torch.autocast("cpu", torch.bfloat16):
+    with disable_input_dtype_casting(staged), torch.inference_mode(), torch.autocast("cpu", torch.bfloat16):
         torch.testing.assert_close(staged(xs), resident(x), rtol=0, atol=0)
 
 
@@ -113,7 +115,7 @@ def test_short_gate_accepts_equal_losses_and_gradients(monkeypatch):
     model = torch.nn.Linear(2, 2, bias=False)
     row = {"episode_id": "short", "action_tokens": 5, "outcome_tokens": 2, "seq_length": 8}
 
-    def equal_pass(model, *_args):
+    def equal_pass(model, *_args, **_kwargs):
         model.weight.grad = torch.ones_like(model.weight)
         return 4.0, 2.0
 

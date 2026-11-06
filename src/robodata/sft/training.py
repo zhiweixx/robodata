@@ -74,6 +74,7 @@ def _identity(prepared, model_dir, fingerprint):
         'base_revision': policy.BASE_REVISION, 'dataset_revision': policy.DATA_REVISION,
         'code_sha256': code, 'versions': versions, 'seed': policy.SEED,
         'ffn_projection_shape': 'native', 'frozen_mlp_host_bytes': EXPECTED_BYTES, 'cpu_activation_offload': True,
+        'adapter_compute_dtype': 'bf16_autocast_without_input_upcast',
         'rank': 16, 'alpha': 32, 'dropout': 0, 'batch_size': 8,
         'outcome_weight': 0.25, 'epoch_count': 1, 'max_lr': 5e-5, 'min_lr': 5e-6,
         'warmup_updates': 2, 'weight_decay': 0, 'gradient_clip': 1.0,
@@ -188,20 +189,25 @@ def _offload_activations(model):
     return torch.autograd.graph.saved_tensors_hooks(pack, unpack)
 
 
-def _episode_backward(model, prepared, processor, row, denominators, offload):
+def _episode_backward(model, prepared, processor, row, denominators, offload, *, skip_input_upcast=True):
     import torch
+    from peft.helpers import disable_input_dtype_casting
     phase = 'loading episode'
     try:
         kwargs, positions, roles = _inputs(prepared, row, processor)
         phase = 'forward'
         context = _offload_activations(model) if offload else contextlib.nullcontext()
-        with context, torch.autocast('cuda', dtype=torch.bfloat16):
-            a, o, _ = _sparse_loss(model, kwargs, positions, roles)
-            loss = a / denominators[0] + policy.OUTCOME_WEIGHT * o / denominators[1]
-        if not torch.isfinite(loss).item():
-            raise FloatingPointError(f"Nonfinite objective on {row['episode_id']}")
-        phase = 'backward'
-        loss.backward()
+        # PEFT otherwise makes an FP32 activation the width of the full projection.
+        # Autocast already feeds BF16 to the adapter GEMMs. Keep the same policy
+        # active while checkpointed layers recompute their forward in backward.
+        with disable_input_dtype_casting(model, active=skip_input_upcast):
+            with context, torch.autocast('cuda', dtype=torch.bfloat16):
+                a, o, _ = _sparse_loss(model, kwargs, positions, roles)
+                loss = a / denominators[0] + policy.OUTCOME_WEIGHT * o / denominators[1]
+            if not torch.isfinite(loss).item():
+                raise FloatingPointError(f"Nonfinite objective on {row['episode_id']}")
+            phase = 'backward'
+            loss.backward()
         return a.item(), o.item()
     except torch.cuda.OutOfMemoryError as exc:
         exc.add_note(f"{row['episode_id']}: {phase}")
@@ -236,7 +242,7 @@ def _short_ffn_check(model, prepared, processor, row):
 
     model.train()
     denominators = (row['action_tokens'], row['outcome_tokens'])
-    native = _episode_backward(model, prepared, processor, row, denominators, True)
+    native = _episode_backward(model, prepared, processor, row, denominators, True, skip_input_upcast=False)
     params = [(name, p) for name, p in model.named_parameters() if p.requires_grad]
     if any(p.grad is None for _, p in params):
         raise RuntimeError('Missing trainable gradient in native short-episode check')
@@ -470,6 +476,7 @@ def _verify_adapter(run, identity):
 def _evaluate(prepared, model_dir, run, rows, processor, identity):
     import torch
     from peft import PeftModel
+    from peft.helpers import disable_input_dtype_casting
     digest = _verify_adapter(run, identity)
     val_path = run / 'validation.json'
     if val_path.exists():
@@ -491,7 +498,7 @@ def _evaluate(prepared, model_dir, run, rows, processor, identity):
                     digest, row['episode_id'], identity['data_fingerprint']):
                 raise ValueError('Cached validation row identity mismatch')
         else:
-            with torch.inference_mode(), torch.autocast('cuda', dtype=torch.bfloat16):
+            with disable_input_dtype_casting(model), torch.inference_mode(), torch.autocast('cuda', dtype=torch.bfloat16):
                 kwargs, pos, roles = _inputs(prepared, row, processor)
                 a, o, (pred, nll) = _sparse_loss(model, kwargs, pos, roles, classify=row['success'])
                 item = {'episode_id': row['episode_id'], 'adapter_sha256': digest,
