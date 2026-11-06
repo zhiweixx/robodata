@@ -95,3 +95,46 @@ def test_verdict_ignores_eos_logits_and_uses_prior_state():
     pred, nll = policy.verdict(logits, torch.tensor([2, 3]), torch.tensor([2, 2]), ids, False)
     assert pred is True
     assert nll == pytest.approx(2.126928, abs=1e-6)
+
+
+def test_committed_peft_and_adam_resume_at_exact_next_episode(tmp_path, monkeypatch):
+    torch = pytest.importorskip('torch')
+    peft = pytest.importorskip('peft')
+    from robodata.sft.training import _checkpoint, _restore
+    # CPU RNG stand-in exercises serialization without touching CUDA.
+    monkeypatch.setattr(torch.cuda, 'get_rng_state', torch.get_rng_state)
+    monkeypatch.setattr(torch.cuda, 'set_rng_state', torch.set_rng_state)
+    class Toy(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.proj = torch.nn.Linear(2, 2)
+        def forward(self, x):
+            return self.proj(x)
+
+    def construct():
+        torch.manual_seed(12)
+        model = peft.get_peft_model(Toy(), peft.LoraConfig(r=2, lora_alpha=2,
+                                                           target_modules=['proj'], lora_dropout=0))
+        return model, torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=.01)
+
+    def update(model, optimizer):
+        optimizer.zero_grad()
+        out = model(torch.tensor([[.1, -.9]]))
+        out.square().sum().backward()
+        optimizer.step()
+        return out.detach()
+
+    groups = [[{'episode_id': 'episode-a'}], [{'episode_id': 'episode-b'}]]
+    identity = {'manifest': 'fixed'}
+    history = [{'optimizer_step': 1, 'train/episodes_seen': 1}]
+    first, adam = construct()
+    update(first, adam)
+    _checkpoint(tmp_path, first, adam, 1, groups, history, identity)
+    step2 = update(first, adam)
+    second, resumed = construct()
+    assert _restore(tmp_path, second, resumed, groups, identity) == history
+    with pytest.raises(ValueError, match='identity|different'):
+        _restore(tmp_path, second, resumed, groups, {'manifest': 'different'})
+    torch.testing.assert_close(update(second, resumed), step2)
+    for p, q in zip(first.parameters(), second.parameters(), strict=True):
+        torch.testing.assert_close(p, q)
