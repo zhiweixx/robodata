@@ -86,18 +86,21 @@ Each training episode contributes once, across 26 AdamW updates. Gradient
 checkpointing and computing vocabulary logits only at the predecessors of
 labelled positions keep the full multimodal causal prefix intact.
 
-Each language feed-forward layer processes tiles of 1,024 positions. A
-partial final tile is zero-padded inside the positionwise feed-forward layer to
-use the same GEMM row count. Its padded outputs are discarded before returning
-to the decoder; the original positions, attention mask and loss remain intact.
-These projections act independently at each position. Attention still spans
-the full causal history. Training recomputes each feed-forward block during
-backpropagation and offloads saved activations to CPU memory. Tiling can
-change floating-point rounding when LoRA gradients are added across positions.
-The GPU preflight checks a short episode against native computation, then runs
-a forward and backward pass on the longest retained training episode before
-the first optimizer update. The reloaded adapter uses the same feed-forward
-tile size on the held-out layouts.
+Across the 64 language decoder layers, the 192 frozen BF16 gate, up and down
+projection weights occupy 31.875 GiB. Training stores these weights in host
+RAM and copies each weight to the H200 for its native full-sequence linear
+operation. Backpropagation stages the same immutable weight again if its
+input gradient needs it. LoRA parameters and gradients stay on the H200.
+The same placement applies to the reloaded adapter during evaluation.
+
+The CPU regression compares the native Qwen MLP with the staged version,
+including all six adapter gradients and the input gradient. On the H200,
+preflight measures the decrease in live GPU tensor storage against the
+31.875 GiB expected from the weights. It compares a short episode's losses and
+adapter gradients with GPU-resident computation, then runs a full forward and
+backward pass on the longest retained training episode with activation
+offload before taking the first optimizer step. See the run's
+`preflight.json` for its measured memory and parity results.
 
 ## Read the metrics
 
