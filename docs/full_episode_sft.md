@@ -106,6 +106,23 @@ backward pass on the longest retained training episode with activation
 offload before taking the first optimizer step. See the run's
 `preflight.json` for its measured memory and parity results.
 
+### Optional fused kernels for a new run
+
+The default uses the original Qwen normalization and feed-forward operations.
+For a new run with Triton on the H200, add `--fused-kernels` to the train
+command and select a fresh run directory. This option fuses the ordinary and
+gated language RMSNorm operations and the pointwise SiLU/multiply in each of
+the 64 feed-forward layers. The formulas preserve Qwen's BF16 rounding points
+and the frozen normalization weights. Attention, sequence length, adapter
+projections and image processing use the same paths.
+
+The preflight compares the two loss terms and the full vector of trainable
+gradients on the same short episode, then checks a complete forward and
+backward pass on the longest training episode before updating the adapter.
+The run identity records the chosen kernels, and resume and validation
+select them from the saved configuration. Compare `peak_allocated_gib` in the
+two preflight receipts for a measured difference on the same episode.
+
 ## Read the metrics
 
 Per-update metrics separate action and outcome NLL, include both token

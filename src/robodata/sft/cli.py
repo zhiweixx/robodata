@@ -18,6 +18,8 @@ def add_sft_parser(subparsers):
         stage.add_argument("--run-dir", type=Path, required=True)
         if name == "train":
             stage.add_argument("--resume", action="store_true", help="continue from the committed optimizer step")
+            stage.add_argument("--fused-kernels", action="store_true", default=None,
+                               help="verify and use fused language RMSNorm and SwiGLU")
 
 
 def run_sft(args):
@@ -43,7 +45,7 @@ def run_sft(args):
     from robodata.sft.training import evaluate, train
     run = args.run_dir.expanduser().resolve()
     if args.sft_command == "train":
-        train(prepared, model, run, resume=args.resume)
+        train(prepared, model, run, resume=args.resume, fused_kernels=args.fused_kernels)
     else:
         evaluate(prepared, model, run)
     return {"stage": args.sft_command, "run_dir": str(run)}

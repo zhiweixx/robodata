@@ -54,7 +54,7 @@ def _dataset(prepared):
     return manifest, train, val
 
 
-def _identity(prepared, model_dir, fingerprint):
+def _identity(prepared, model_dir, fingerprint, *, fused_kernels=False):
     pinned = read_json(Path(__file__).with_name('weight_hashes.json'))
     index_path = model_dir / 'model.safetensors.index.json'
     if sha256(index_path) != pinned['index_sha256'] or pinned['revision'] != policy.BASE_REVISION:
@@ -67,6 +67,10 @@ def _identity(prepared, model_dir, fingerprint):
     code = {n: sha256(Path(__file__).with_name(n)) for n in
             ('policy.py', 'training.py', 'native_weight_offload.py', 'memory_profile.py', 'run_io.py', 'encoding.py', 'weight_hashes.json', 'split_manifest.json')}
     versions = {n: importlib.metadata.version(n) for n in ('torch', 'transformers', 'peft', 'wandb', 'fla-core', 'accelerate')}
+    if fused_kernels:
+        for name in ('fused_rmsnorm.py', 'fused_swiglu.py'):
+            code[name] = sha256(Path(__file__).with_name(name))
+        versions['triton'] = importlib.metadata.version('triton')
     return {
         'manifest_sha256': sha256(prepared / 'eligible_manifest.json'), 'data_fingerprint': fingerprint,
         'full_manifest_sha256': sha256(prepared / 'manifest.json'),
@@ -75,6 +79,7 @@ def _identity(prepared, model_dir, fingerprint):
         'code_sha256': code, 'versions': versions, 'seed': policy.SEED,
         'ffn_projection_shape': 'native', 'frozen_mlp_host_bytes': EXPECTED_BYTES, 'cpu_activation_offload': True,
         'adapter_compute_dtype': 'bf16_autocast_without_input_upcast',
+        'fused_kernels': fused_kernels,
         'rank': 16, 'alpha': 32, 'dropout': 0, 'batch_size': 8,
         'outcome_weight': 0.25, 'epoch_count': 1, 'max_lr': 5e-5, 'min_lr': 5e-6,
         'warmup_updates': 2, 'weight_decay': 0, 'gradient_clip': 1.0,
@@ -118,7 +123,17 @@ def _new_model(model_dir, run):
         if param.dtype != torch.float32:
             raise ValueError('Expected FP32 trainable adapters with frozen BF16 base')
     model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={'use_reentrant': False})
-    write_json(run / 'lora_targets.json', {'targets': targets, 'trainable_parameters': count})
+    layers = model.get_base_model().model.language_model.layers
+    checkpointed = sum(bool(getattr(layer, 'gradient_checkpointing', False)) for layer in layers)
+    if len(layers) != 64 or checkpointed != len(layers):
+        raise ValueError(f'Expected 64 checkpointed Qwen decoder layers, observed {checkpointed}')
+    adapters = model.get_base_model()
+    if any(not isinstance(adapters.get_submodule(name).lora_dropout['default'], torch.nn.Identity)
+           for name in targets):
+        raise ValueError('Expected identity dropout in every target adapter')
+    write_json(run / 'lora_targets.json', {'targets': targets, 'trainable_parameters': count,
+                                          'checkpointed_language_layers': checkpointed,
+                                          'identity_dropout_projections': len(targets)})
     print(f'Verified {len(targets)} language projections and {count:,} LoRA parameters', flush=True)
     return model
 
@@ -236,7 +251,15 @@ def _clear():
     torch.cuda.empty_cache()
 
 
-def _short_ffn_check(model, prepared, processor, row):
+def _install_pointwise_kernels(model, enabled):
+    if not enabled:
+        return {}
+    from robodata.sft.fused_rmsnorm import install_fused_rmsnorm
+    from robodata.sft.fused_swiglu import install_fused_swiglu
+    return {'rmsnorm': install_fused_rmsnorm(model), 'swiglu': install_fused_swiglu(model)}
+
+
+def _short_ffn_check(model, prepared, processor, row, *, fused_kernels=False):
     """Compare the same released episode and the same unmodified adapter, before any update."""
     import torch
 
@@ -249,6 +272,7 @@ def _short_ffn_check(model, prepared, processor, row):
     reference = [p.grad.detach().cpu() for _, p in params]
     model.zero_grad(set_to_none=True)
     residency = offload_native_qwen_mlps(model)
+    kernels = _install_pointwise_kernels(model, fused_kernels)
     staged = _episode_backward(model, prepared, processor, row, denominators, True)
 
     reference_sq = staged_sq = error_sq = inner = 0.
@@ -278,7 +302,8 @@ def _short_ffn_check(model, prepared, processor, row):
     return {'episode_id': row['episode_id'], 'seq_length': row['seq_length'],
             'resident_action_nll': ref_nll[0], 'staged_action_nll': new_nll[0],
             'resident_outcome_nll': ref_nll[1], 'staged_outcome_nll': new_nll[1],
-            'weight_residency': residency, 'lora_gradient_tensors': len(params), 'gradient_relative_l2': relative,
+            'weight_residency': residency, 'pointwise_kernels': kernels,
+            'lora_gradient_tensors': len(params), 'gradient_relative_l2': relative,
             'gradient_cosine': cosine, 'worst_nonzero_tensor': worst_name,
             'worst_tensor_relative_l2': worst_relative, 'passed': passed}
 
@@ -303,6 +328,7 @@ def _check_gpu(model, prepared, rows, processor, run, identity):
             raise ValueError('Preflight identity mismatch')
         if old['passed']:
             offload_native_qwen_mlps(model)
+            _install_pointwise_kernels(model, identity['fused_kernels'])
             return True
     short = min((r for r in rows if r['action_tokens']), key=lambda r: r['seq_length'])
     longest = max(rows, key=lambda r: r['seq_length'])
@@ -315,7 +341,8 @@ def _check_gpu(model, prepared, rows, processor, run, identity):
         result['short_comparison'] = _sdpa_check(model, prepared, processor, short)
         result['phase'] = 'short_resident_staged_parity'
         print('Checking short episode loss and all trainable gradients with resident and host-staged frozen MLP weights', flush=True)
-        result['ffn_comparison'] = _short_ffn_check(model, prepared, processor, short)
+        result['ffn_comparison'] = _short_ffn_check(
+            model, prepared, processor, short, fused_kernels=identity['fused_kernels'])
         write_json(receipt, result)
         if not result['ffn_comparison']['passed']:
             raise ValueError('Short-episode resident/staged numerical parity failed; see preflight.json')
@@ -486,6 +513,7 @@ def _evaluate(prepared, model_dir, run, rows, processor, identity):
         return val['summary']
     model = PeftModel.from_pretrained(_base_model(model_dir), run / 'adapter', is_trainable=False)
     offload_native_qwen_mlps(model)
+    _install_pointwise_kernels(model, identity['fused_kernels'])
     model.eval()
     decisions = []
     # A committed row lets an interrupted offline validation continue once per completed state.
@@ -543,17 +571,17 @@ def _validation_summary(decisions):
     return summary
 
 
-def _prepare(prepared_dir, model_path, run_dir):
+def _prepare(prepared_dir, model_path, run_dir, *, fused_kernels=False):
     from robodata.sft.encoding import load_processor
     prepared, model, run = map(lambda p: Path(p).resolve(), (prepared_dir, model_path, run_dir))
     manifest, rows, val = _dataset(prepared)
-    ident = _identity(prepared, model, manifest['fingerprint'])
+    ident = _identity(prepared, model, manifest['fingerprint'], fused_kernels=fused_kernels)
     return prepared, model, run, load_processor(model), rows, val, ident
 
 
-def preflight(prepared_dir, model_path, run_dir):
+def preflight(prepared_dir, model_path, run_dir, *, fused_kernels=False):
     """Validate exact sparse loss and full longest-episode backward without an optimizer."""
-    prep, path, run, processor, rows, _, ident = _prepare(prepared_dir, model_path, run_dir)
+    prep, path, run, processor, rows, _, ident = _prepare(prepared_dir, model_path, run_dir, fused_kernels=fused_kernels)
     with locked(run):
         _initialize_seeds()
         model = _new_model(path, run)
@@ -561,9 +589,13 @@ def preflight(prepared_dir, model_path, run_dir):
         return read_json(run / 'preflight.json')
 
 
-def train(prepared_dir, model_path, run_dir, *, resume=False):
+def train(prepared_dir, model_path, run_dir, *, resume=False, fused_kernels=None):
     import torch
-    prep, path, run, processor, rows, val, ident = _prepare(prepared_dir, model_path, run_dir)
+    if fused_kernels is None:
+        config_path = Path(run_dir) / 'run.json'
+        fused_kernels = (read_json(config_path)['identity'].get('fused_kernels', False)
+                         if resume and config_path.is_file() else False)
+    prep, path, run, processor, rows, val, ident = _prepare(prepared_dir, model_path, run_dir, fused_kernels=fused_kernels)
     with locked(run):
         config_path = run / 'run.json'
         if config_path.exists():
@@ -616,7 +648,9 @@ def train(prepared_dir, model_path, run_dir, *, resume=False):
 
 def evaluate(prepared_dir, model_path, run_dir):
     """Evaluate the final adapter, reusing only committed scores of this identical adapter."""
-    prep, path, run, processor, _, val, ident = _prepare(prepared_dir, model_path, run_dir)
+    saved_config = read_json(Path(run_dir) / 'run.json')
+    prep, path, run, processor, _, val, ident = _prepare(
+        prepared_dir, model_path, run_dir, fused_kernels=saved_config['identity'].get('fused_kernels', False))
     with locked(run):
         cfg = read_json(run / 'run.json')
         if cfg['identity'] != ident:
