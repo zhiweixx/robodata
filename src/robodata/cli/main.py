@@ -129,6 +129,8 @@ def main(argv=None):
         item = sub.add_parser(command, help="inspect native results without model execution")
         item.add_argument("--campaign-dir", required=True)
         item.add_argument("--output", help="optional JSON report destination")
+    from robodata.sft.cli import add_sft_parser
+    add_sft_parser(sub)
     args, unknown = parser.parse_known_args(argv)
     try:
         if args.command in {"doctor", "fetch", "setup", "build-container", "submit"}:
@@ -140,7 +142,10 @@ def main(argv=None):
                                     args.command, *tail])
         if unknown:
             parser.error("unrecognized arguments: " + " ".join(unknown))
-        if args.command == "make-manifest":
+        if args.command == "sft":
+            from robodata.sft.cli import run_sft
+            value = run_sft(args)
+        elif args.command == "make-manifest":
             from robodata.eval.robodojo.state_subset import build_state_subset
             manifest = build_state_subset(args.states_per_task, args.exclude_family)
             path = Path(args.output).expanduser().resolve()

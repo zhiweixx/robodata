@@ -19,6 +19,9 @@ For the collaborator’s **30 states per task / all 42 tasks** run, use the
 [professor runbook](docs/PROFESSOR_RUNBOOK.md). It creates a separate 1,207-episode
 campaign with the same model, perception harness and native action budgets.
 
+For full-episode Qwen fine-tuning on successful actions and final outcomes,
+see the [LoRA SFT runbook](docs/full_episode_sft.md).
+
 ## Quickstart
 
 Use Python **3.12**. The following commands install only the CPU package and tests;

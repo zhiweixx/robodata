@@ -1,0 +1,1113 @@
+{
+  "dataset": "robodata-lab/robodojo-gpt6-astra-revised-220-20261101",
+  "metadata_sha256": {
+    "attempts.jsonl": "a7660c2cd4077d0981c4a28dbfea42822e1f41635bf8607a05f069e6e8d1cfd2",
+    "episodes.jsonl": "1d2ce72685a2a627953d455cbe6d039fb3b563c0cbd25fc14b599ead70347b1a",
+    "export_manifest.json": "a278ed3138d3536e21389e2e4fab0423882b324b6898f03360ea7100700f515d",
+    "file_manifest.jsonl": "bbf14ba15ddfafa142a01cdfce80ad2a770ccd0b26b7af76f5eaf315296df84b",
+    "planned_states.jsonl": "4008da97d904ab4fb7100273c752388bc6595a8d1be7e710763044bc3ad8b88d"
+  },
+  "revision": "7df93dc28f4e0495812bad917eed6432360f960d",
+  "states": {
+    "align_blocks_s0_l0": {
+      "semantic_state_sha256": "2311f6b789379fe9502f9d2435e67564be53f275accf62706ff47f62eca1c192",
+      "split": "train",
+      "success": false
+    },
+    "align_blocks_s0_l1": {
+      "semantic_state_sha256": "7b109b9f278135509c83f8e21e3b757571c4c88553f5a7ef038a711914c3b6f5",
+      "split": "train",
+      "success": false
+    },
+    "align_blocks_s0_l2": {
+      "semantic_state_sha256": "441b8c30a0ab6be71090cfaacfa4ee81c9b7df673bfcfda1571ab5375d097d8b",
+      "split": "train",
+      "success": false
+    },
+    "align_blocks_s0_l3": {
+      "semantic_state_sha256": "6dbb61a9de95061bce7fba5f3834c23f83424ebb119e7cb054fb4b0a85b74376",
+      "split": "train",
+      "success": true
+    },
+    "align_blocks_s0_l4": {
+      "semantic_state_sha256": "bae3990cc250ba90f42da0ab7101f3fbe8f4fedb4469464a7513a6ed56a4304f",
+      "split": "train",
+      "success": false
+    },
+    "arrange_largest_number_random_s0_l0": {
+      "semantic_state_sha256": "f619106d8863ce94ab1e7696d3be5a333d537bf6a2442f767dfae0b5e9a4f361",
+      "split": "train",
+      "success": true
+    },
+    "arrange_largest_number_random_s0_l1": {
+      "semantic_state_sha256": "502321340031513a0206d19c9e43c0e1ed0744aa7d9ddaa6e10cea040c560482",
+      "split": "train",
+      "success": true
+    },
+    "arrange_largest_number_random_s0_l2": {
+      "semantic_state_sha256": "01b3b5dd8615549689fc3501b2a918d0e53ea4eb9c1b4b5f3e49b5760c29b7cb",
+      "split": "train",
+      "success": false
+    },
+    "arrange_largest_number_random_s0_l3": {
+      "semantic_state_sha256": "5ab0d47683137e89a67a52c0d6689f1fe849a898aa4a0a548e736e8231813aa6",
+      "split": "train",
+      "success": false
+    },
+    "arrange_largest_number_random_s0_l4": {
+      "semantic_state_sha256": "98277bc8ceaf8c92f3f4f1a285608d7a18dd7b3dd85875a73adb5e3ab3dab20c",
+      "split": "train",
+      "success": false
+    },
+    "arrange_largest_number_s0_l0": {
+      "semantic_state_sha256": "c5682102a854644af135668a8792104976f4c164d1386703adf7b193d69d11e6",
+      "split": "train",
+      "success": true
+    },
+    "arrange_largest_number_s0_l1": {
+      "semantic_state_sha256": "7c265b86a8e5d690e83e4b2100b0a1ca7bcaf348a2c003ee5cdfa22f30309649",
+      "split": "train",
+      "success": true
+    },
+    "arrange_largest_number_s0_l2": {
+      "semantic_state_sha256": "7239ba9e777b5c9de77c6bdf7f4fab53a79dc223b68946a7ceafb0fcb5bafc56",
+      "split": "heldout",
+      "success": true
+    },
+    "arrange_largest_number_s0_l3": {
+      "semantic_state_sha256": "154c3800039f9d118db25b45433c6c4c751c0ed46a9b4814d6e44b21a5e50887",
+      "split": "train",
+      "success": true
+    },
+    "arrange_largest_number_s0_l4": {
+      "semantic_state_sha256": "5b4c6e6aa07e84263661be18f6d8b873f64bfd8a902d42076570ba836718119d",
+      "split": "train",
+      "success": false
+    },
+    "build_tower_s0_l0": {
+      "semantic_state_sha256": "e6f9bf314b6db6448c86105f7d12b280958d99b3f17beb9240b9862d9cef9a3c",
+      "split": "train",
+      "success": false
+    },
+    "build_tower_s0_l1": {
+      "semantic_state_sha256": "a483a672fc7955f86cbf0bd0e883e7d927dd2f3f9919c17419804687eb650f5d",
+      "split": "train",
+      "success": false
+    },
+    "build_tower_s0_l2": {
+      "semantic_state_sha256": "ccabb575c6702dc94a37f85a55578f09c97a01c4f32bc5b65a122804f6f24978",
+      "split": "train",
+      "success": false
+    },
+    "build_tower_s0_l3": {
+      "semantic_state_sha256": "f6e8f9c6cea8077b975ff2fea86832e393483b0d24ed68b592aa18b166946d5f",
+      "split": "heldout",
+      "success": false
+    },
+    "build_tower_s0_l4": {
+      "semantic_state_sha256": "3f7d14af6f5b10e5b2f0ebb611de4856f8501143b04d07ee59b68462652550cb",
+      "split": "train",
+      "success": false
+    },
+    "classify_objects_by_language_s0_l0": {
+      "semantic_state_sha256": "70165c3e73e6a0995481ffe01b3a740d903f0a398655481ade4c7441338650e5",
+      "split": "train",
+      "success": true
+    },
+    "classify_objects_by_language_s0_l1": {
+      "semantic_state_sha256": "c9d111c302cda58fdc12bd93afe7dd4aa04f0622474c64be33e9c1f3e6af1d0b",
+      "split": "heldout",
+      "success": false
+    },
+    "classify_objects_by_language_s0_l2": {
+      "semantic_state_sha256": "848ecdde621b8fb9a1aefd72732983c40aedc2065681ec4ebf3ba60dfae78d45",
+      "split": "train",
+      "success": false
+    },
+    "classify_objects_by_language_s0_l3": {
+      "semantic_state_sha256": "592e57bb574fe439b1a01829b5383e0fbf88bb714734e737ee3448dc45347798",
+      "split": "train",
+      "success": false
+    },
+    "classify_objects_by_language_s0_l4": {
+      "semantic_state_sha256": "186ec3714182fe19cad6e5856564cc8f8a9eebe3ff3802ce0499855af603a401",
+      "split": "train",
+      "success": false
+    },
+    "classify_objects_s0_l0": {
+      "semantic_state_sha256": "5afcc49205ccc327a9bdb3ca8f5ef69f873ef151f21cb6cc40bd1ddb2b23ca87",
+      "split": "train",
+      "success": false
+    },
+    "classify_objects_s0_l1": {
+      "semantic_state_sha256": "eb196712a6c79a9390a1f9f9a924f9143984aa952c142aece79e8509963cf200",
+      "split": "heldout",
+      "success": false
+    },
+    "classify_objects_s0_l2": {
+      "semantic_state_sha256": "64abac523398eea2bb3757a7971b0ee9878460df1cf81dcc96c5f507a5d049db",
+      "split": "train",
+      "success": false
+    },
+    "classify_objects_s0_l3": {
+      "semantic_state_sha256": "c4329014bf772351a0b285f974e1f957f5425165689278c1f37c60fa0f50a8e7",
+      "split": "train",
+      "success": false
+    },
+    "classify_objects_s0_l4": {
+      "semantic_state_sha256": "b369c5eb62f226b7fa47c47576a3b9c3b93791eec173c071fc69559430da077b",
+      "split": "train",
+      "success": false
+    },
+    "cover_blocks_s0_l0": {
+      "semantic_state_sha256": "9d217e0f13f9698ba0fc352e5863a8e8775d684dee91f9bb9ed88897089b8e64",
+      "split": "train",
+      "success": true
+    },
+    "cover_blocks_s0_l1": {
+      "semantic_state_sha256": "adb5a38724c9e8536141da10afc25ef8c3d7b6889663e5028f702262c5346225",
+      "split": "train",
+      "success": true
+    },
+    "cover_blocks_s0_l12": {
+      "semantic_state_sha256": "aa7d507c3b1cc3dfeed991934ffe0819b737828435687f3a560dfeb0d54a8d3a",
+      "split": "train",
+      "success": true
+    },
+    "cover_blocks_s0_l2": {
+      "semantic_state_sha256": "39ab9c062c4f7eb1e07278fb0f1721251454f3d4e7ae4d53f5b315b40123acae",
+      "split": "train",
+      "success": false
+    },
+    "cover_blocks_s0_l7": {
+      "semantic_state_sha256": "7cceaaac6c8ddb19356ce6ae6e6e529620f9d558e38140fc7b3b0fa670a176b1",
+      "split": "train",
+      "success": false
+    },
+    "deposit_coin_s0_l1": {
+      "semantic_state_sha256": "4095654595351a9d8b618929e4e5e06f59024dc2b1c98d4fd71b62a847436330",
+      "split": "train",
+      "success": false
+    },
+    "deposit_coin_s0_l2": {
+      "semantic_state_sha256": "97fc951af5eeea45f6337c0e060fea39dcc57024cd80dd0aa7ee3c54ef58b05a",
+      "split": "train",
+      "success": false
+    },
+    "deposit_coin_s0_l3": {
+      "semantic_state_sha256": "b1a1cdb8c990eab54a7690fc809122d714c08eb21b377c857fbf768fb4599218",
+      "split": "train",
+      "success": false
+    },
+    "deposit_coin_s0_l4": {
+      "semantic_state_sha256": "5ed646a83db60b207f5c06385b26b5c3629df51eb4001de99ca5b2f96395066c",
+      "split": "train",
+      "success": false
+    },
+    "deposit_coin_s0_l6": {
+      "semantic_state_sha256": "e18d6784b3f05d920f945a5bca3625cdbe74103deea848040ee58fa640e80f13",
+      "split": "train",
+      "success": false
+    },
+    "fasten_screws_s0_l0": {
+      "semantic_state_sha256": "f6caf30bf0af80435b59bfbab8ef01578bb1f6d0a7f0fb9767cadad562566d52",
+      "split": "train",
+      "success": true
+    },
+    "fasten_screws_s0_l1": {
+      "semantic_state_sha256": "f16ca67e8987eca553581f92876f16f8964b03634b28734a67e09d2aceefbda8",
+      "split": "train",
+      "success": false
+    },
+    "fasten_screws_s0_l2": {
+      "semantic_state_sha256": "d36120d6298995e067d06e1e29926727ee8e2f73c48c4a6c6aecfeb98ba66609",
+      "split": "train",
+      "success": false
+    },
+    "fasten_screws_s0_l3": {
+      "semantic_state_sha256": "3b8326e8d1a1ff0b480dd3d0fd8e3a1cf17c7e167e7b844a8755d05c868f77a6",
+      "split": "train",
+      "success": false
+    },
+    "fasten_screws_s0_l4": {
+      "semantic_state_sha256": "db3fbde2819bdcc2a7d16166cbab859c45bcc9a03b7d948ab3c55d4ce8696b81",
+      "split": "train",
+      "success": false
+    },
+    "fill_egg_holder_s0_l0": {
+      "semantic_state_sha256": "164bc96dea86b3487616467e337116e30259b0e0632fc73538ffed9b4ca0d5ce",
+      "split": "train",
+      "success": false
+    },
+    "fill_egg_holder_s0_l1": {
+      "semantic_state_sha256": "ff88f62bbce4181da60a60620e8e045418934a917803dcb4565d176bbee38091",
+      "split": "heldout",
+      "success": false
+    },
+    "fill_egg_holder_s0_l2": {
+      "semantic_state_sha256": "aa508af66bef1f6837edcbcf2ed6174ae1e08c1683214d0cc001c7f3f3b67e28",
+      "split": "train",
+      "success": false
+    },
+    "fill_egg_holder_s0_l3": {
+      "semantic_state_sha256": "54c1807819f84dbaede4d88a7b556c3b250a5ecf644054a40dea9a8d0eff0ede",
+      "split": "train",
+      "success": false
+    },
+    "fill_egg_holder_s0_l4": {
+      "semantic_state_sha256": "e456c21edab2bacc5068dd1bcdb2e16563b17135fc0ac52c8562e2aa5bef24b0",
+      "split": "train",
+      "success": false
+    },
+    "fill_pen_holder_s0_l0": {
+      "semantic_state_sha256": "b314725ddd0a1bd471274470fc450913e6c8f255de14334a15984750db59e56f",
+      "split": "train",
+      "success": false
+    },
+    "fill_pen_holder_s0_l1": {
+      "semantic_state_sha256": "7f683d0ab38e7afce7c808dc8007a5b45ff0262a0e099f164758acad2787c44f",
+      "split": "train",
+      "success": false
+    },
+    "fill_pen_holder_s0_l2": {
+      "semantic_state_sha256": "caea2923ba99ff76180b959b222e722ef00778bd262397039bb80a06dfef2067",
+      "split": "train",
+      "success": false
+    },
+    "fill_pen_holder_s0_l3": {
+      "semantic_state_sha256": "507eea62b46e3d935f4ced767ef91807d12171b79b2952c14f72f5e47c89e92d",
+      "split": "train",
+      "success": false
+    },
+    "fill_pen_holder_s0_l4": {
+      "semantic_state_sha256": "71f108005ae4936ced28d6ac548368e1f96fdb8a419a70a8270669ca71cd08c9",
+      "split": "train",
+      "success": false
+    },
+    "general_pickup_s0_l0": {
+      "semantic_state_sha256": "c362cbfbcc8dfe2d072d4445d93bd1beafb1783643ffe6090c40ac071d4575bf",
+      "split": "train",
+      "success": true
+    },
+    "general_pickup_s0_l1": {
+      "semantic_state_sha256": "0d5209f49fd78f12a7d6d2083239045d1451f75fcfc07a12bfb5076822787c57",
+      "split": "train",
+      "success": true
+    },
+    "general_pickup_s0_l2": {
+      "semantic_state_sha256": "c60679f30e82cc5abfc5814afc04f6f81d0494334ed93dfa0f54fd6397e91b90",
+      "split": "train",
+      "success": false
+    },
+    "general_pickup_s0_l3": {
+      "semantic_state_sha256": "26a65a1e4454f79173b1c4a7b91c55001314359960f4b10ae4dab730c916c444",
+      "split": "train",
+      "success": true
+    },
+    "general_pickup_s0_l4": {
+      "semantic_state_sha256": "2de977be9183ad43eb8da25aaa645265e051c966912ea7e23e73b1b22a2d1905",
+      "split": "train",
+      "success": true
+    },
+    "hang_mugs_random_s0_l0": {
+      "semantic_state_sha256": "a12eb815817ed92718befed3a5e3a31b66251e2060759a24d2b705a7909590ba",
+      "split": "train",
+      "success": false
+    },
+    "hang_mugs_random_s0_l1": {
+      "semantic_state_sha256": "72cf661e4229859d653b851d1c8cd4076780dc978d8057f9cdb1f1755bda788d",
+      "split": "train",
+      "success": false
+    },
+    "hang_mugs_random_s0_l2": {
+      "semantic_state_sha256": "bd3bd061d19d06cccd951c47cee5698f6e3611014cd3d915cda1fd1e681ab54b",
+      "split": "train",
+      "success": false
+    },
+    "hang_mugs_random_s0_l3": {
+      "semantic_state_sha256": "63d85b59f87f97313a9ba5355c9e521643761b18b30a720df835b6cdb39bacbc",
+      "split": "heldout",
+      "success": false
+    },
+    "hang_mugs_random_s0_l4": {
+      "semantic_state_sha256": "b8b5ec82c051ea53e663310514d81ec73649622f4d733081ee7b3f3b8755c743",
+      "split": "train",
+      "success": false
+    },
+    "hang_mugs_s0_l0": {
+      "semantic_state_sha256": "ba4d85fc4f1d25f83f2bcb183aaf5e14e48d884b11f2629af721021779c014d6",
+      "split": "train",
+      "success": false
+    },
+    "hang_mugs_s0_l1": {
+      "semantic_state_sha256": "2d4d3aea17b7a82eae39453d87fba190f2c7db406aea5198f91c1565eaed6253",
+      "split": "train",
+      "success": false
+    },
+    "hang_mugs_s0_l2": {
+      "semantic_state_sha256": "8c82f6a2805905ad020c2412175edee3a6a47d30eb8b1b0938b5a217661b9c28",
+      "split": "train",
+      "success": false
+    },
+    "hang_mugs_s0_l3": {
+      "semantic_state_sha256": "035f6841a0b6e983591c99c7a625467e30ed1bb22c748ba45611d51a71060760",
+      "split": "train",
+      "success": false
+    },
+    "hang_mugs_s0_l4": {
+      "semantic_state_sha256": "9b3a231a6a3662234c403f6e375ec88e15e74801461322c1343ea86c05dc68e6",
+      "split": "train",
+      "success": false
+    },
+    "imitate_sorting_sequence_s0_l0": {
+      "semantic_state_sha256": "a277e14470a125ea89cb443926f54b17cd35c8a9e0daf464d11b064735136650",
+      "split": "train",
+      "success": false
+    },
+    "imitate_sorting_sequence_s0_l1": {
+      "semantic_state_sha256": "135c491181d89831cf719b2b8a5315277ff24f9e4e902e09f74ac1458e0fe34a",
+      "split": "train",
+      "success": false
+    },
+    "imitate_sorting_sequence_s0_l2": {
+      "semantic_state_sha256": "79a4e076cf5c6390e6b5018a2767e788bc40d81db2ba12b05034e6dde4970562",
+      "split": "train",
+      "success": false
+    },
+    "imitate_sorting_sequence_s0_l3": {
+      "semantic_state_sha256": "30387b63e55b6c9c1e06f2091815a123a3837cded0d14ec4079e152c26682f8a",
+      "split": "train",
+      "success": false
+    },
+    "imitate_sorting_sequence_s0_l4": {
+      "semantic_state_sha256": "c1be13f255fcfef617b7ca2b1a9487eb5942e0240f29e4f9a5eba12a7611265a",
+      "split": "unscored",
+      "success": null
+    },
+    "insert_key_s0_l0": {
+      "semantic_state_sha256": "e5192d90219f0459b85958e46a2de14eac78064ee522e84589ed062edd5f8482",
+      "split": "train",
+      "success": false
+    },
+    "insert_key_s0_l1": {
+      "semantic_state_sha256": "b6c0e80c09f9c2e90548b8829b0876cb9cdb8ed406e5c548e5fe411c96860fb8",
+      "split": "train",
+      "success": false
+    },
+    "insert_key_s0_l2": {
+      "semantic_state_sha256": "2049f057a0d5244d6c2352a815ddaa65f21f0253305ea25ee999f36d976f21d2",
+      "split": "train",
+      "success": false
+    },
+    "insert_key_s0_l3": {
+      "semantic_state_sha256": "9cda181fab2dd2af3c0f9a810dfea5691168b753d9084b9326b2c66314422b8b",
+      "split": "train",
+      "success": false
+    },
+    "insert_key_s0_l4": {
+      "semantic_state_sha256": "878dfe1e4ebc27a011f1073bf499979e6836b116492438c6b858d3019b3d9ec1",
+      "split": "train",
+      "success": false
+    },
+    "insert_tubes_s0_l0": {
+      "semantic_state_sha256": "3cca0d41b3cbae39953b2c07137db78127b309491cf0b9df235c31e26384674a",
+      "split": "train",
+      "success": false
+    },
+    "insert_tubes_s0_l1": {
+      "semantic_state_sha256": "3ee2276b9e418848eb88cd4185b5bb6d90d8a35dfc363beadb54af2dc3aef657",
+      "split": "train",
+      "success": false
+    },
+    "insert_tubes_s0_l2": {
+      "semantic_state_sha256": "6e1515ed57a30a1ac1cee83ea63fba592364952037ff33bfd719fd7c1c5007c9",
+      "split": "train",
+      "success": false
+    },
+    "insert_tubes_s0_l3": {
+      "semantic_state_sha256": "6f54e9974f2c613eb83f5c0883c97316b2a209e6fe85c081c456262a46e6e29a",
+      "split": "train",
+      "success": false
+    },
+    "insert_tubes_s0_l4": {
+      "semantic_state_sha256": "0b82e9c38fdc0d7f8673d60bf0e9afd1e73f41013366984b21f1a33aac713853",
+      "split": "train",
+      "success": false
+    },
+    "make_kong_s0_l0": {
+      "semantic_state_sha256": "66a6ae2f342716ba58dd18c383bea8f5c252d986a593edb7819b0a72113f4f58",
+      "split": "train",
+      "success": false
+    },
+    "make_kong_s0_l1": {
+      "semantic_state_sha256": "ee9ac92bffaa05c586b23ad7c0e4a150a0c07d36f2e933c0b7ea8a40e386e566",
+      "split": "train",
+      "success": false
+    },
+    "make_kong_s0_l2": {
+      "semantic_state_sha256": "b3779bdf0e9a6b69545fe87c34bbfc80e5d58e18a2c5aed73999777edd898a10",
+      "split": "train",
+      "success": false
+    },
+    "make_kong_s0_l3": {
+      "semantic_state_sha256": "e054ad9b1c2bc4b6e9ad55655af4db8c3829b9d0053b0d2d414065ad0a29b732",
+      "split": "train",
+      "success": false
+    },
+    "make_kong_s0_l4": {
+      "semantic_state_sha256": "f9279cbb7c6707e56ede237c54a673dddd4fdeb684d47697fa4047f6c0e6eaaa",
+      "split": "train",
+      "success": false
+    },
+    "make_toast_random_s0_l0": {
+      "semantic_state_sha256": "3f10fe6405aaa8f7dbf1132d568851ce6892aecf95a6a357272923237746ee42",
+      "split": "train",
+      "success": false
+    },
+    "make_toast_random_s0_l1": {
+      "semantic_state_sha256": "893e785e8d31564cbdb65396c223ae9ad736e8f624ecdd3fbc88a463acf6b5ba",
+      "split": "train",
+      "success": false
+    },
+    "make_toast_random_s0_l2": {
+      "semantic_state_sha256": "4f2f2d2de3e6c7a93eeb35bd15cd61f428ccb4a4a858c083de16a6d3ba811bb0",
+      "split": "train",
+      "success": false
+    },
+    "make_toast_random_s0_l3": {
+      "semantic_state_sha256": "6a9e204f7764362bbdd2f2d97502204a56915de59054a40070625800435700bb",
+      "split": "train",
+      "success": false
+    },
+    "make_toast_s0_l0": {
+      "semantic_state_sha256": "468adad91a89bad4c75c1b4ba8672496976f712c949e33918c6ba4720205078f",
+      "split": "train",
+      "success": false
+    },
+    "make_toast_s0_l1": {
+      "semantic_state_sha256": "c30a4e4255cd29d4de6f71ce8ed2bc64b4c97d9838c9e2d73cf174a0509ac5b2",
+      "split": "unscored",
+      "success": null
+    },
+    "make_toast_s0_l2": {
+      "semantic_state_sha256": "48f26ca05e95abdded7bcb4ed543acbb2113e5b841aaccd8a0f7f3d3d5a5d2d7",
+      "split": "heldout",
+      "success": false
+    },
+    "make_toast_s0_l3": {
+      "semantic_state_sha256": "b5452e3c4d9b25e14a9792943c87f202baefcc53be6586059efb7b4d17214de3",
+      "split": "train",
+      "success": true
+    },
+    "make_toast_s0_l4": {
+      "semantic_state_sha256": "ea75b93c237e0920cc75d3ccfab0924beae472bd935cb4d69acd063fdaec5645",
+      "split": "train",
+      "success": false
+    },
+    "match_and_pick_from_conveyor_s0_l0": {
+      "semantic_state_sha256": "8e24ea8b89faeda2ee663661e997d082639993be8576fb093093edbed1db0d89",
+      "split": "train",
+      "success": true
+    },
+    "match_and_pick_from_conveyor_s0_l1": {
+      "semantic_state_sha256": "9e2e89e27c2db750d6127c4685f8491199f80c3f9fdd4a396c3a9847c1e43945",
+      "split": "heldout",
+      "success": true
+    },
+    "match_and_pick_from_conveyor_s0_l2": {
+      "semantic_state_sha256": "cf4ab059fc9d83787b5baf98217d75c299cee758b0eb287bfcd932d0b43d6733",
+      "split": "train",
+      "success": true
+    },
+    "match_and_pick_from_conveyor_s0_l3": {
+      "semantic_state_sha256": "0fab3fef4851647d7603fe66e7dcef9f20f11ef9132c260a118b3239e539767e",
+      "split": "train",
+      "success": true
+    },
+    "match_and_pick_from_conveyor_s0_l4": {
+      "semantic_state_sha256": "9492ee1e61f47ae3be4fba030bbe68c7789a560a81bbca5b03b284d91e16fddf",
+      "split": "train",
+      "success": true
+    },
+    "organize_table_s0_l0": {
+      "semantic_state_sha256": "5d2d5cd13dbbf763d18bd2e0f53a0077ab1491cf1d074c98fdf44724fdacf433",
+      "split": "train",
+      "success": false
+    },
+    "organize_table_s0_l1": {
+      "semantic_state_sha256": "716541d4727a6af18f82a5185fe15557af19d5c8d12be9c355e765f41c987c11",
+      "split": "train",
+      "success": false
+    },
+    "organize_table_s0_l2": {
+      "semantic_state_sha256": "51173c8da182a0da9ada1fd6f69c5e134deb811d92a5231b52bd855cb31883fc",
+      "split": "train",
+      "success": true
+    },
+    "organize_table_s0_l3": {
+      "semantic_state_sha256": "f20d6aaa9a1b52fcf5e16093b424fb644ac08bd8ab8d299aaf517e1a8e5dc6b5",
+      "split": "train",
+      "success": false
+    },
+    "organize_table_s0_l4": {
+      "semantic_state_sha256": "84ac516f645c3d762251950d9d40f67ccd9df118b241fa5023a5f600834e3b53",
+      "split": "train",
+      "success": false
+    },
+    "pack_objects_into_box_random_s0_l0": {
+      "semantic_state_sha256": "62c4ec143411070f64923b0de92370998cb6c191ec5bb250aeede3af3ad348d9",
+      "split": "train",
+      "success": false
+    },
+    "pack_objects_into_box_random_s0_l1": {
+      "semantic_state_sha256": "d8d7c08d843d7a416ccbff87a87582b8441d36a4d7d8ba096a6095f90549d1b2",
+      "split": "train",
+      "success": false
+    },
+    "pack_objects_into_box_random_s0_l2": {
+      "semantic_state_sha256": "f507f35d764194bc128525c5c006c9675825974c814f84bacc458e900d7aeab7",
+      "split": "train",
+      "success": false
+    },
+    "pack_objects_into_box_random_s0_l3": {
+      "semantic_state_sha256": "d58d00d64f5e9ad4b995371c7ba109edb27a7dfedfb2cb9f8e5f5bd67e120c33",
+      "split": "train",
+      "success": false
+    },
+    "pack_objects_into_box_random_s0_l4": {
+      "semantic_state_sha256": "e10665bb37b76a698bbf376143512e04d3c4beb9f0773028ab1aeb57f0e593d0",
+      "split": "train",
+      "success": false
+    },
+    "pack_objects_into_box_s0_l0": {
+      "semantic_state_sha256": "caf2a9fc94ae0f543c105a0a0a8d705d37532d4849ac772efd8a7f232928788e",
+      "split": "train",
+      "success": false
+    },
+    "pack_objects_into_box_s0_l1": {
+      "semantic_state_sha256": "97ca6c7b445f10f550121b70cc5673c7e157084596554c372d4a5710cf9348ee",
+      "split": "train",
+      "success": false
+    },
+    "pack_objects_into_box_s0_l2": {
+      "semantic_state_sha256": "7d9b1fde1d3189c639544dbc0dd45f65b3387f68bd99af0e4e4b8499f67493c8",
+      "split": "train",
+      "success": false
+    },
+    "pack_objects_into_box_s0_l3": {
+      "semantic_state_sha256": "ca6c72ca9f86aab9b0c3bf8e05d8d3343517dd48a036d8f012545fa8d8da44d4",
+      "split": "train",
+      "success": false
+    },
+    "pack_objects_into_box_s0_l4": {
+      "semantic_state_sha256": "18938897100f664b4c4e83226244209b76d89f736a678be64ad612a5fb0a4ff1",
+      "split": "train",
+      "success": false
+    },
+    "pick_from_conveyor_by_image_s0_l0": {
+      "semantic_state_sha256": "7db7a6004d1cf67df0a10fe863f6597a715b38421983a384383b0c9495312ee4",
+      "split": "train",
+      "success": false
+    },
+    "pick_from_conveyor_by_image_s0_l1": {
+      "semantic_state_sha256": "6d97123b1bdb2b48134889e2478a4d78a04aeb4b5801adacd95363c3a8815d08",
+      "split": "train",
+      "success": false
+    },
+    "pick_from_conveyor_by_image_s0_l2": {
+      "semantic_state_sha256": "3a7d33ee0355bddf7f6f00910cdf247fe3616ee5a15ccc3d9fa104637bb7df24",
+      "split": "heldout",
+      "success": true
+    },
+    "pick_from_conveyor_by_image_s0_l3": {
+      "semantic_state_sha256": "60454c51a95afc2660eceb04fad67ac272c3e62172d2cbabaf25382003ff400b",
+      "split": "train",
+      "success": true
+    },
+    "pick_from_conveyor_by_image_s0_l4": {
+      "semantic_state_sha256": "186b71ae8ecbbe8701cf7e8bfa40cd546e081a527e434b53697d584df68ed7ea",
+      "split": "train",
+      "success": false
+    },
+    "play_Xylophone_s0_l0": {
+      "semantic_state_sha256": "f817b4895015570f5c4d274dd4c87c0e5ab208514c598ea1dc2718faa07b6099",
+      "split": "train",
+      "success": true
+    },
+    "play_Xylophone_s0_l1": {
+      "semantic_state_sha256": "c5e8b72d2bc01ab46368ba97c9ca3bd15e86707547e21eed8f39bdb1528ef7e9",
+      "split": "train",
+      "success": false
+    },
+    "play_Xylophone_s0_l2": {
+      "semantic_state_sha256": "be715e668cdb426c15a12727df10ace5ea85e8e86d1b1002a32268c397f29df1",
+      "split": "train",
+      "success": false
+    },
+    "play_Xylophone_s0_l3": {
+      "semantic_state_sha256": "5f8fe44b65609f4a4fb67142c988696c95f49b57afa14995eccb00d41dd60d21",
+      "split": "train",
+      "success": false
+    },
+    "play_Xylophone_s0_l4": {
+      "semantic_state_sha256": "bef1cdf1e1d9eec749919b59b53aa4afb4b5ad1d26303c2abd8d89e058d7fd7f",
+      "split": "heldout",
+      "success": false
+    },
+    "play_stacking_toy_s0_l0": {
+      "semantic_state_sha256": "9fe51fbffd3fc0202e9e11be0070cd70d7a6f7a4dbce90172e5bb134f53b1d28",
+      "split": "train",
+      "success": false
+    },
+    "play_stacking_toy_s0_l1": {
+      "semantic_state_sha256": "d31d54d7b9c9d94135265bcc17fbba4b38b078c35e7113af7b0770268a95f1b7",
+      "split": "train",
+      "success": false
+    },
+    "play_stacking_toy_s0_l2": {
+      "semantic_state_sha256": "8d857b021def1a1dfcc217423d6ec1955580148fbd3d3809eda9b8fbcb3b0d9f",
+      "split": "train",
+      "success": false
+    },
+    "play_stacking_toy_s0_l3": {
+      "semantic_state_sha256": "4e9a20da4bcb278519183cb67669cb925316f28601f426bfa1b55704b88c5f58",
+      "split": "train",
+      "success": false
+    },
+    "play_tic_tac_toe_s0_l0": {
+      "semantic_state_sha256": "9df50d9f1d62ca53baf54f25f101d88f4a9515939036f51f50444828b2ed2122",
+      "split": "train",
+      "success": false
+    },
+    "pour_balls_into_vase_s0_l0": {
+      "semantic_state_sha256": "a159363a338003f122678947c5e37aaabb0e98b651de997e859989ec6ec48431",
+      "split": "train",
+      "success": false
+    },
+    "pour_balls_into_vase_s0_l1": {
+      "semantic_state_sha256": "ab7718a1a2e27f2d6ba16e6a936e567e9293f3e2cdbeda527959ed2cea5f1e2b",
+      "split": "train",
+      "success": false
+    },
+    "pour_balls_into_vase_s0_l2": {
+      "semantic_state_sha256": "6585eba35b04dbe2e2c8e834cdc8b1dc1c20c6aebcb72bc87df8e0c3403220c2",
+      "split": "train",
+      "success": false
+    },
+    "pour_balls_into_vase_s0_l3": {
+      "semantic_state_sha256": "bca4712211c0d807a62882c955f0f052ecfb5f2639c6e3d96791d0c0169f5dd1",
+      "split": "train",
+      "success": false
+    },
+    "pour_balls_into_vase_s0_l4": {
+      "semantic_state_sha256": "d58918b65a144f4f316ed804b2be485cb2802a85b061c9fc6854d8bf1c5bb125",
+      "split": "train",
+      "success": false
+    },
+    "press_by_number_s0_l0": {
+      "semantic_state_sha256": "e63e3c0b5153b6e34b9824b198293af94e0ab4089dac53f30cb37f0ef89eaf2e",
+      "split": "train",
+      "success": true
+    },
+    "press_by_number_s0_l1": {
+      "semantic_state_sha256": "6eb3a6abd4cef302ec85ad4759b09b37373c6241439c4036dc1df0896297e049",
+      "split": "train",
+      "success": true
+    },
+    "press_by_number_s0_l2": {
+      "semantic_state_sha256": "03b820f28096c1bce3e607bb37c50d5c055b820296198de78cadfc613fb1c675",
+      "split": "train",
+      "success": true
+    },
+    "press_by_number_s0_l3": {
+      "semantic_state_sha256": "b1ede168e0f32736d5eae2e4aab9bff79b005ecc6996583936936c2bb41330ef",
+      "split": "train",
+      "success": true
+    },
+    "press_by_number_s0_l4": {
+      "semantic_state_sha256": "08b05fb2039b50b2cf420dfec879dbb09786d40aa00cee179a3f35ce16b66c58",
+      "split": "train",
+      "success": true
+    },
+    "push_T_random_s0_l0": {
+      "semantic_state_sha256": "71988fe8de71a79b9749575bc952f541f3e743fb48e42fd998822df092ea8aff",
+      "split": "train",
+      "success": true
+    },
+    "push_T_random_s0_l1": {
+      "semantic_state_sha256": "3bdb457970323425f3ff61363277280f8512a2d30061bdf19a705c408b6957fa",
+      "split": "train",
+      "success": false
+    },
+    "push_T_random_s0_l2": {
+      "semantic_state_sha256": "03fbb9d5ae6c95be5e04398440cdf7f9623f73193352a8089b8a0c692d249603",
+      "split": "train",
+      "success": false
+    },
+    "push_T_random_s0_l3": {
+      "semantic_state_sha256": "1a57651c3fc530ae432f68e2b45e7dc8401fe1f6f1a9ba44a8e181f5f8247f7d",
+      "split": "train",
+      "success": false
+    },
+    "push_T_random_s0_l4": {
+      "semantic_state_sha256": "012ea6337a4cb8cd83f35e96f4b75dd46e8835c0de55ef342c739ecc6790e5ca",
+      "split": "train",
+      "success": true
+    },
+    "push_T_s0_l0": {
+      "semantic_state_sha256": "25334fec4a9f4d015a368814e803bdd165db0083025bcfcf35806e891797bb23",
+      "split": "train",
+      "success": true
+    },
+    "push_T_s0_l1": {
+      "semantic_state_sha256": "8e4bb315d9e0a6c297d80598127fd480a506f5407f97623f77b35e12c884b574",
+      "split": "train",
+      "success": true
+    },
+    "push_T_s0_l2": {
+      "semantic_state_sha256": "9decbd5d437e4a4e6fb1b5a2c1d9f4fad8a53e4b67005c5898601af575886af4",
+      "split": "train",
+      "success": true
+    },
+    "push_T_s0_l3": {
+      "semantic_state_sha256": "61a18a6f5ee35d10295e8ee121c128111d3884ebe3451510d9d4993a4ae0aa1a",
+      "split": "train",
+      "success": false
+    },
+    "push_T_s0_l4": {
+      "semantic_state_sha256": "5d6a89de07d392edbcd7f6e55e263ad8fccef46810a7f3b70604f3e5d4506c89",
+      "split": "train",
+      "success": false
+    },
+    "put_bottles_into_dustbin_s0_l0": {
+      "semantic_state_sha256": "f9c945c62b1279fabd88c272350b093f7807c38c43ae9dc37b0ccc74ae74a2f9",
+      "split": "train",
+      "success": false
+    },
+    "put_bottles_into_dustbin_s0_l1": {
+      "semantic_state_sha256": "78c7386401970facb5f875515ac3e8058d8fcf07cf27b1cd9b4368ccf5f46d21",
+      "split": "train",
+      "success": true
+    },
+    "put_bottles_into_dustbin_s0_l2": {
+      "semantic_state_sha256": "c812e33d949448e5a1b99a0921652af551f4c47bd51e287ce68c0e97e23a7ad2",
+      "split": "train",
+      "success": false
+    },
+    "put_bottles_into_dustbin_s0_l3": {
+      "semantic_state_sha256": "b892fa4b51c36aa3b9ebcef513bda961bcaa2e60bc48d40233b677c1027e6773",
+      "split": "train",
+      "success": false
+    },
+    "put_bottles_into_dustbin_s0_l4": {
+      "semantic_state_sha256": "8333982bd7383a9f500c76ba6c7c1317dcfa6f067a3b31e8dfb11e5f042d536e",
+      "split": "train",
+      "success": false
+    },
+    "solve_equation_s0_l0": {
+      "semantic_state_sha256": "8b8db8d575a7ebf7d80790c0476268a17a63d70120ba22105b915e3100026fde",
+      "split": "train",
+      "success": true
+    },
+    "solve_equation_s0_l1": {
+      "semantic_state_sha256": "64b41f59d4a21c903281f2d7076bb9f531529506982c47659939eebbc245fe80",
+      "split": "train",
+      "success": false
+    },
+    "solve_equation_s0_l2": {
+      "semantic_state_sha256": "b0e2e86419444b09db87d0a3aa4ed56f4f6f7c623d9ea6f621ad23660d17b67b",
+      "split": "train",
+      "success": false
+    },
+    "solve_equation_s0_l3": {
+      "semantic_state_sha256": "dfb3ef600b8526cd94769d13e23af0662b8a151530eddfc8f8eff4e7c82ac103",
+      "split": "heldout",
+      "success": true
+    },
+    "solve_equation_s0_l4": {
+      "semantic_state_sha256": "8174865dc2cceee41e018c12e38f411fdf4a0d738d8fbc60997a7763ee6056b3",
+      "split": "train",
+      "success": false
+    },
+    "sort_nesting_dolls_by_size_random_s0_l0": {
+      "semantic_state_sha256": "f67d32dc79819ed13194b62cee423eac46373c9ce9ac75e6a153a856637c4cf4",
+      "split": "train",
+      "success": false
+    },
+    "sort_nesting_dolls_by_size_random_s0_l1": {
+      "semantic_state_sha256": "bfc45532ff2f13c1bc02f19599582506ffb1341e050aefd0d936a36aa43c6937",
+      "split": "train",
+      "success": false
+    },
+    "sort_nesting_dolls_by_size_random_s0_l2": {
+      "semantic_state_sha256": "ce8cea978601d65e5a13cd1d714367ad5a3e8bd1f462428e2feef4958da9bfe1",
+      "split": "train",
+      "success": false
+    },
+    "sort_nesting_dolls_by_size_random_s0_l3": {
+      "semantic_state_sha256": "d0016ab8779e66183fde76155ed5cda4de1f30be229f03c11da806ba3950b970",
+      "split": "train",
+      "success": false
+    },
+    "sort_nesting_dolls_by_size_s0_l0": {
+      "semantic_state_sha256": "6f7a269954d67ed3625096356320158f948ef56c9ca5455f848a99735fd1b105",
+      "split": "train",
+      "success": false
+    },
+    "sort_nesting_dolls_by_size_s0_l1": {
+      "semantic_state_sha256": "7294ccb465ee560b515bada894c759e7b060517c13376d0b6d520601099e136c",
+      "split": "train",
+      "success": false
+    },
+    "sort_nesting_dolls_by_size_s0_l2": {
+      "semantic_state_sha256": "31455e709e0797643033d6975f6696dadd2760feb06f16dc5f8deb26d19916fa",
+      "split": "train",
+      "success": false
+    },
+    "sort_nesting_dolls_by_size_s0_l3": {
+      "semantic_state_sha256": "c989b55185aca80870cd9dd6f5341e417bd3336a700bb172affb1e67362a0efc",
+      "split": "train",
+      "success": false
+    },
+    "stack_blocks_by_language_s0_l0": {
+      "semantic_state_sha256": "75692bf63792a892fa29efdf76040982e2f7d604b95359354c2209bc6cb6cad3",
+      "split": "train",
+      "success": false
+    },
+    "stack_blocks_by_language_s0_l1": {
+      "semantic_state_sha256": "ff8ed014b973ed2b67de57d9b8abf952d01b84d4ae411f237cc1e426659ca1ad",
+      "split": "train",
+      "success": false
+    },
+    "stack_blocks_by_language_s0_l2": {
+      "semantic_state_sha256": "113083fb02720f0bc4a068d3f3cd8b3dcea27383c8dc2aa4c66a7ce5b617fbfe",
+      "split": "train",
+      "success": false
+    },
+    "stack_blocks_by_language_s0_l3": {
+      "semantic_state_sha256": "b7c57bec40ad88fc3fb6f2e12c7f9a7069b8f67fa64aaa4a127074621c53d71e",
+      "split": "train",
+      "success": false
+    },
+    "stack_blocks_random_s0_l0": {
+      "semantic_state_sha256": "99dbef43c53c0a7cd158526beec97da147ebcf7d4d5f3299615d807393ec25e2",
+      "split": "train",
+      "success": false
+    },
+    "stack_blocks_random_s0_l1": {
+      "semantic_state_sha256": "ea0655ebe8e346bb4bb8f54a53e58cbbfa34b18e60a9ff6e22b05f74291dfb3b",
+      "split": "train",
+      "success": false
+    },
+    "stack_blocks_random_s0_l2": {
+      "semantic_state_sha256": "19d27d65692d2267d3d9cc7836d5d012b6e325f3a7e2d2e8dc9fc91aeae6626b",
+      "split": "train",
+      "success": true
+    },
+    "stack_blocks_random_s0_l3": {
+      "semantic_state_sha256": "08893a48b460e399d59150a5f4c1638b951697dbdece7f76f54f4b13bcffb8aa",
+      "split": "train",
+      "success": true
+    },
+    "stack_blocks_s0_l0": {
+      "semantic_state_sha256": "26b4c3c1b94d6654c12a34b8c796f1acd83565cee9379f43f7710f4b943a94cd",
+      "split": "train",
+      "success": true
+    },
+    "stack_blocks_s0_l1": {
+      "semantic_state_sha256": "fc4c092b85cdd5d2e03ebc4b3a81d5c9cea3f064858fc13df5355aa38842d08e",
+      "split": "train",
+      "success": true
+    },
+    "stack_blocks_s0_l2": {
+      "semantic_state_sha256": "9d9f8c4bf79ff56fc3e1bce75189d977c48006557731f0c88e38b41bf3691bbc",
+      "split": "train",
+      "success": true
+    },
+    "stack_blocks_s0_l3": {
+      "semantic_state_sha256": "9b011d8a443847edbe5a1b0d082f033ebc89184914027cca2084de73c218f372",
+      "split": "train",
+      "success": true
+    },
+    "stack_bowls_random_s0_l0": {
+      "semantic_state_sha256": "61c7b83fff8b92cc42e3b703f90fabbd2004bd0288618957559463ddb1e6d3f4",
+      "split": "train",
+      "success": true
+    },
+    "stack_bowls_random_s0_l1": {
+      "semantic_state_sha256": "130681b43136a1b3f33f6c8aa8af666f108e0621885c41d42c7f9938956dcae0",
+      "split": "train",
+      "success": false
+    },
+    "stack_bowls_random_s0_l2": {
+      "semantic_state_sha256": "5254f510c890354bbccb4f4273649dfdff7334c83ee415043cd2576f5492475f",
+      "split": "train",
+      "success": false
+    },
+    "stack_bowls_random_s0_l3": {
+      "semantic_state_sha256": "953e5b113919f5bb61796bc3a87c79ad12cba5a19520d97be1dfce6248b8e11a",
+      "split": "train",
+      "success": true
+    },
+    "stack_bowls_s0_l0": {
+      "semantic_state_sha256": "9a9335480a8099c4c49cf1224ddba613ab9a6b63240a307e28a5cc44945ce789",
+      "split": "train",
+      "success": true
+    },
+    "stack_bowls_s0_l1": {
+      "semantic_state_sha256": "55152af5afe304931a7a2a08e3babdf9b7cb2c1020ad10b01ee8a090be8bcacf",
+      "split": "train",
+      "success": false
+    },
+    "stack_bowls_s0_l2": {
+      "semantic_state_sha256": "c0c82a089762e4b2770860a14703c55fcb4602bd758b6b08689dfe9643a4a71a",
+      "split": "train",
+      "success": true
+    },
+    "stack_bowls_s0_l3": {
+      "semantic_state_sha256": "3127c912579c0880740f741f3da666f10dbd7c3cb339848a5a771122b693da0d",
+      "split": "train",
+      "success": true
+    },
+    "store_laptop_and_headphones_random_s0_l0": {
+      "semantic_state_sha256": "a7f63da5bc34324b08bbb57387a0fae4e34a92e46aa30c6f4cfd5b44873cfc9d",
+      "split": "train",
+      "success": false
+    },
+    "store_laptop_and_headphones_random_s0_l1": {
+      "semantic_state_sha256": "757d66f458ed722fb43b4eb12f2935f8b4adff800eac11c9be0e240d172ddfea",
+      "split": "train",
+      "success": false
+    },
+    "store_laptop_and_headphones_random_s0_l2": {
+      "semantic_state_sha256": "17950786418dad853bdaa5507fc4d462a5fd2fcd14a2afab8c51855bb640254a",
+      "split": "train",
+      "success": false
+    },
+    "store_laptop_and_headphones_random_s0_l3": {
+      "semantic_state_sha256": "897aa9db67c9782e26fe5b342ba07a61152e6e5b03dfa195ee0c50226d3b0d23",
+      "split": "train",
+      "success": false
+    },
+    "store_laptop_and_headphones_s0_l0": {
+      "semantic_state_sha256": "854c83e5a175800b53b48b231a73665840e2cc11f5e52f88c0b94d072b1cd9b1",
+      "split": "train",
+      "success": false
+    },
+    "store_laptop_and_headphones_s0_l1": {
+      "semantic_state_sha256": "8805c87e429d69a8163c269840ea7734b654a5b9dc7dff330693b2323ac845df",
+      "split": "train",
+      "success": false
+    },
+    "store_laptop_and_headphones_s0_l2": {
+      "semantic_state_sha256": "e44c3e2bdf3820ef0ba0429e9c1bf5ae9d3c4de687c711ddb95a2305540faef6",
+      "split": "train",
+      "success": false
+    },
+    "store_laptop_and_headphones_s0_l3": {
+      "semantic_state_sha256": "2fe27b864e758854b7671e82925052072c5001a06bfe9be71a3923121022d507",
+      "split": "train",
+      "success": false
+    },
+    "store_tools_in_toolbox_s0_l0": {
+      "semantic_state_sha256": "44180f6668bef519bb1cffa05cb67eb3996311a8ac702683b72eec572cc19a35",
+      "split": "train",
+      "success": false
+    },
+    "store_tools_in_toolbox_s0_l1": {
+      "semantic_state_sha256": "3a0c3a597dfbcafd22ae2cfbd7f45b4b1b98dce6d99f26c4039289fe8553a915",
+      "split": "train",
+      "success": false
+    },
+    "store_tools_in_toolbox_s0_l2": {
+      "semantic_state_sha256": "cc82248b8542feebadaad8109447e7515f758729149d092bdcbe0ac795475e77",
+      "split": "train",
+      "success": false
+    },
+    "store_tools_in_toolbox_s0_l3": {
+      "semantic_state_sha256": "caf31fbe0e505a776f22d3ad3f9fec2d961f4a19d9bbe91dcd6e2feaa596f067",
+      "split": "train",
+      "success": false
+    },
+    "swap_T_s0_l0": {
+      "semantic_state_sha256": "f785c673f3f0843973c43db43f339015b9134c0cc5ec48a435396f77dfdedcef",
+      "split": "train",
+      "success": false
+    },
+    "swap_T_s0_l1": {
+      "semantic_state_sha256": "92be7910ecc3a0bf363194516607b404c9de051a001040190bab141bf95fb78e",
+      "split": "train",
+      "success": false
+    },
+    "swap_T_s0_l2": {
+      "semantic_state_sha256": "33bc3ab1ffe10f9fa4ef46d18d936317886f7ee545e91546c18a8422f5f3983b",
+      "split": "train",
+      "success": false
+    },
+    "swap_T_s0_l3": {
+      "semantic_state_sha256": "91dbdc156d169abfcd70802d892a084e2ac4b4ef9affabfbee68cf69fd6413ae",
+      "split": "train",
+      "success": false
+    },
+    "swap_blocks_s0_l0": {
+      "semantic_state_sha256": "f0dce91de7d440f88f643a2c165b9eedcd6dff8a6f250f14964f1ab8de5a8905",
+      "split": "train",
+      "success": false
+    },
+    "swap_blocks_s0_l1": {
+      "semantic_state_sha256": "b49c998288caa867c92342fe4848165cc7e785be4674393ff39bd0c56a28813e",
+      "split": "train",
+      "success": false
+    },
+    "swap_blocks_s0_l2": {
+      "semantic_state_sha256": "64f61deea125b5fa1e17696cf60b4bf6b2d6baea24367252e731cdec3c1ead0b",
+      "split": "heldout",
+      "success": false
+    },
+    "swap_blocks_s0_l3": {
+      "semantic_state_sha256": "bc2cbec8770d12db15ee50731c25f5c0e9c4c1c43e84f0ef0200cfb4cdb7521b",
+      "split": "train",
+      "success": false
+    },
+    "sweep_blocks_random_s0_l0": {
+      "semantic_state_sha256": "9a8d9f306a83044c8884af10128452d7ad5fd0d27d5eb9acfde8caf02bd1dd07",
+      "split": "train",
+      "success": false
+    },
+    "sweep_blocks_random_s0_l1": {
+      "semantic_state_sha256": "8877e72251ea0b4c0f77de84003de81a74e7e529a1269ba235d7d6d634c4e343",
+      "split": "train",
+      "success": false
+    },
+    "sweep_blocks_random_s0_l2": {
+      "semantic_state_sha256": "50eb47552b75a6039102898a9d783c3558ada281158675298644139f92322eca",
+      "split": "train",
+      "success": false
+    },
+    "sweep_blocks_random_s0_l3": {
+      "semantic_state_sha256": "4b4ca0d37c20837681acb4834f0cec30dd73372082d12fd056fb1e18d2386c14",
+      "split": "train",
+      "success": false
+    },
+    "sweep_blocks_s0_l0": {
+      "semantic_state_sha256": "26a6981d2b033b95f26ac7d6b6787f451f46ea1a9b6f9985242419877070af7b",
+      "split": "train",
+      "success": false
+    },
+    "sweep_blocks_s0_l1": {
+      "semantic_state_sha256": "6b43befa6b7bf6bfca332cac3834518524fa60ca8173bd0f930144102b55c071",
+      "split": "train",
+      "success": false
+    },
+    "sweep_blocks_s0_l2": {
+      "semantic_state_sha256": "b6e39619561da8d66dd7255f06dbf4ea8fc943e49466c96c57e92e4ece1f2690",
+      "split": "unscored",
+      "success": null
+    },
+    "sweep_blocks_s0_l3": {
+      "semantic_state_sha256": "d31c83b041ac7c5a4597677070a190e1e0b1e0d4fe186112e86d099603610a28",
+      "split": "train",
+      "success": false
+    }
+  }
+}
