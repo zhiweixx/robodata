@@ -8,9 +8,11 @@ from pathlib import Path
 import random
 import tempfile
 import time
+import traceback
 import uuid
 
 from robodata.sft import policy
+from robodata.sft.tiled_mlp import FFN_TILE_SIZE, tile_qwen_language_ffns
 from robodata.sft.run_io import OfflineMetrics, atomic, locked, read_json, sha256, write_json, write_metrics
 
 
@@ -62,7 +64,7 @@ def _identity(prepared, model_dir, fingerprint):
         if sha256(model_dir / name) != expected:
             raise ValueError(f'Base-model weight hash differs: {name}')
     code = {n: sha256(Path(__file__).with_name(n)) for n in
-            ('policy.py', 'training.py', 'run_io.py', 'encoding.py', 'weight_hashes.json', 'split_manifest.json')}
+            ('policy.py', 'training.py', 'tiled_mlp.py', 'run_io.py', 'encoding.py', 'weight_hashes.json', 'split_manifest.json')}
     versions = {n: importlib.metadata.version(n) for n in ('torch', 'transformers', 'peft', 'wandb', 'fla-core', 'accelerate')}
     return {
         'manifest_sha256': sha256(prepared / 'eligible_manifest.json'), 'data_fingerprint': fingerprint,
@@ -70,6 +72,7 @@ def _identity(prepared, model_dir, fingerprint):
         'model_index_sha256': pinned['index_sha256'],
         'base_revision': policy.BASE_REVISION, 'dataset_revision': policy.DATA_REVISION,
         'code_sha256': code, 'versions': versions, 'seed': policy.SEED,
+        'ffn_tile_tokens': FFN_TILE_SIZE, 'cpu_activation_offload': True,
         'rank': 16, 'alpha': 32, 'dropout': 0, 'batch_size': 8,
         'outcome_weight': 0.25, 'epoch_count': 1, 'max_lr': 5e-5, 'min_lr': 5e-6,
         'warmup_updates': 2, 'weight_decay': 0, 'gradient_clip': 1.0,
@@ -186,15 +189,23 @@ def _offload_activations(model):
 
 def _episode_backward(model, prepared, processor, row, denominators, offload):
     import torch
-    kwargs, positions, roles = _inputs(prepared, row, processor)
-    context = _offload_activations(model) if offload else contextlib.nullcontext()
-    with context, torch.autocast('cuda', dtype=torch.bfloat16):
-        a, o, _ = _sparse_loss(model, kwargs, positions, roles)
-        loss = a / denominators[0] + policy.OUTCOME_WEIGHT * o / denominators[1]
-    if not torch.isfinite(loss).item():
-        raise FloatingPointError(f"Nonfinite objective on {row['episode_id']}")
-    loss.backward()
-    return a.item(), o.item()
+    phase = 'loading episode'
+    try:
+        kwargs, positions, roles = _inputs(prepared, row, processor)
+        phase = 'forward'
+        context = _offload_activations(model) if offload else contextlib.nullcontext()
+        with context, torch.autocast('cuda', dtype=torch.bfloat16):
+            a, o, _ = _sparse_loss(model, kwargs, positions, roles)
+            loss = a / denominators[0] + policy.OUTCOME_WEIGHT * o / denominators[1]
+        if not torch.isfinite(loss).item():
+            raise FloatingPointError(f"Nonfinite objective on {row['episode_id']}")
+        phase = 'backward'
+        loss.backward()
+        return a.item(), o.item()
+    except torch.cuda.OutOfMemoryError as exc:
+        exc.add_note(f"{row['episode_id']}: {phase}")
+        raise
+
 
 
 def _sdpa_check(model, prepared, processor, row):
@@ -218,6 +229,64 @@ def _clear():
     torch.cuda.empty_cache()
 
 
+def _short_ffn_check(model, prepared, processor, row):
+    """Compare the same released episode and the same unmodified adapter, before any update."""
+    import torch
+
+    model.train()
+    denominators = (row['action_tokens'], row['outcome_tokens'])
+    native = _episode_backward(model, prepared, processor, row, denominators, True)
+    params = [(name, p) for name, p in model.named_parameters() if p.requires_grad]
+    if any(p.grad is None for _, p in params):
+        raise RuntimeError('Missing trainable gradient in native short-episode check')
+    reference = [p.grad.detach().cpu() for _, p in params]
+    model.zero_grad(set_to_none=True)
+    tile_qwen_language_ffns(model)
+    tiled = _episode_backward(model, prepared, processor, row, denominators, True)
+
+    reference_sq = tiled_sq = error_sq = inner = 0.
+    worst_name, worst_relative = None, 0.
+    for (name, p), ref in zip(params, reference, strict=True):
+        if p.grad is None:
+            raise RuntimeError(f'Missing tiled gradient for {name}')
+        observed = p.grad.detach().cpu().reshape(-1)
+        ref = ref.reshape(-1)
+        err = torch.linalg.vector_norm(observed - ref).item()
+        norm = torch.linalg.vector_norm(ref).item()
+        reference_sq += norm ** 2
+        tiled_sq += torch.linalg.vector_norm(observed).item() ** 2
+        error_sq += err ** 2
+        inner += torch.dot(observed, ref).item()
+        if norm > 0 and err / norm > worst_relative:
+            worst_name, worst_relative = name, err / norm
+    model.zero_grad(set_to_none=True)
+    ref_nll = [v / n for v, n in zip(native, denominators, strict=True)]
+    new_nll = [v / n for v, n in zip(tiled, denominators, strict=True)]
+    cosine = inner / max((reference_sq * tiled_sq)**0.5, 1e-30)
+    relative = error_sq**0.5 / max(reference_sq**0.5, 1e-30)
+    # Mixed precision and changing GEMM reduction order can shift low bits. Compare
+    # the entire trainable gradient vector in addition to both token-normalized NLLs.
+    passed = (reference_sq > 0 and relative <= 0.05 and cosine >= 0.998 and
+              all(math.isclose(a, b, abs_tol=0.02, rel_tol=0.003)
+                  for a, b in zip(ref_nll, new_nll, strict=True)))
+    return {'episode_id': row['episode_id'], 'seq_length': row['seq_length'],
+            'native_action_nll': ref_nll[0], 'tiled_action_nll': new_nll[0],
+            'native_outcome_nll': ref_nll[1], 'tiled_outcome_nll': new_nll[1],
+            'lora_gradient_tensors': len(params), 'gradient_relative_l2': relative,
+            'gradient_cosine': cosine, 'worst_nonzero_tensor': worst_name,
+            'worst_tensor_relative_l2': worst_relative, 'passed': passed}
+
+
+def _oom_evidence(exc):
+    import torch
+    frames = traceback.extract_tb(exc.__traceback__, limit=-24)
+    return {'type': type(exc).__name__, 'message': str(exc)[:1200],
+            'phase': list(getattr(exc, '__notes__', [])),
+            'frames': [f'{Path(f.filename).name}:{f.lineno}:{f.name}' for f in frames],
+            'allocated_gib': torch.cuda.memory_allocated() / 2**30,
+            'reserved_gib': torch.cuda.memory_reserved() / 2**30}
+
+
 def _check_gpu(model, prepared, rows, processor, run, identity):
     import torch
     receipt = run / 'preflight.json'
@@ -226,37 +295,44 @@ def _check_gpu(model, prepared, rows, processor, run, identity):
         if old['identity'] != identity:
             raise ValueError('Preflight identity mismatch')
         if old['passed']:
-            return old['offload']
+            tile_qwen_language_ffns(model)
+            return True
     short = min((r for r in rows if r['action_tokens']), key=lambda r: r['seq_length'])
     longest = max(rows, key=lambda r: r['seq_length'])
     result = {'identity': identity, 'passed': False, 'longest_episode': longest['episode_id'],
-              'longest_seq_length': longest['seq_length'], 'attempts': []}
+              'longest_seq_length': longest['seq_length'], 'attempts': [],
+              'offload': True, 'ffn_tile_tokens': FFN_TILE_SIZE}
     try:
+        result['phase'] = 'short_dense_sparse_parity'
         print(f"Checking sparse and dense loss on {short['episode_id']} ({short['seq_length']} tokens)", flush=True)
         result['short_comparison'] = _sdpa_check(model, prepared, processor, short)
-        model.train()
-        for offload in (False, True):
-            print(f"Checking longest training episode {longest['episode_id']} "
-                  f"({longest['seq_length']} tokens, activation offload={offload})", flush=True)
-            _clear()
-            torch.cuda.reset_peak_memory_stats()
-            ok = False
-            try:
-                _episode_backward(model, prepared, processor, longest, (
-                    max(1, longest['action_tokens']), longest['outcome_tokens']), offload)
-                torch.nn.utils.clip_grad_norm_([p for p in model.parameters() if p.requires_grad],
-                                               1, error_if_nonfinite=True)
-                ok = True
-            except torch.cuda.OutOfMemoryError:
-                if offload:
-                    raise
-            finally:
-                model.zero_grad(set_to_none=True)
-                result['attempts'].append({'offload': offload, 'passed': ok,
-                    'peak_allocated_gib': torch.cuda.max_memory_allocated() / 2**30})
-            if ok:
-                result.update(passed=True, offload=offload)
-                return offload
+        result['phase'] = 'short_native_tiled_parity'
+        print('Checking short episode loss and all trainable gradients with native and tiled FFNs', flush=True)
+        result['ffn_comparison'] = _short_ffn_check(model, prepared, processor, short)
+        write_json(receipt, result)
+        if not result['ffn_comparison']['passed']:
+            raise ValueError('Short-episode native/tiled numerical parity failed; see preflight.json')
+        result['phase'] = 'longest_tiled_forward_backward'
+        print(f"Checking longest training episode {longest['episode_id']} "
+              f"({longest['seq_length']} tokens, CPU offload, FFN tile {FFN_TILE_SIZE})", flush=True)
+        _clear()
+        torch.cuda.reset_peak_memory_stats()
+        attempt = {'offload': True, 'passed': False, 'ffn_tile_tokens': FFN_TILE_SIZE}
+        result['attempts'].append(attempt)
+        try:
+            _episode_backward(model, prepared, processor, longest, (
+                max(1, longest['action_tokens']), longest['outcome_tokens']), True)
+            attempt['grad_norm'] = torch.nn.utils.clip_grad_norm_(
+                [p for p in model.parameters() if p.requires_grad], 1, error_if_nonfinite=True).item()
+            attempt['passed'] = True
+        finally:
+            attempt['peak_allocated_gib'] = torch.cuda.max_memory_allocated() / 2**30
+            model.zero_grad(set_to_none=True)
+        result.update(passed=True, phase='complete')
+        return True
+    except torch.cuda.OutOfMemoryError as exc:
+        result['oom'] = _oom_evidence(exc)
+        raise
     finally:
         write_json(receipt, result)
         _clear()
@@ -400,6 +476,7 @@ def _evaluate(prepared, model_dir, run, rows, processor, identity):
             raise ValueError('Held-out evaluation identity mismatch')
         return val['summary']
     model = PeftModel.from_pretrained(_base_model(model_dir), run / 'adapter', is_trainable=False)
+    tile_qwen_language_ffns(model)
     model.eval()
     decisions = []
     # A committed row lets an interrupted offline validation continue once per completed state.
@@ -519,7 +596,9 @@ def train(prepared_dir, model_path, run_dir, *, resume=False):
             del model, params, optimizer
             _clear()
             validation = _evaluate(prep, path, run, val, processor, ident)
-        except BaseException:
+        except BaseException as exc:
+            if isinstance(exc, torch.cuda.OutOfMemoryError):
+                write_json(run / 'oom.json', _oom_evidence(exc))
             metrics.finish()
             raise
         metrics.finish(epoch | validation)

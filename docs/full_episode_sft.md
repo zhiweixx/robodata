@@ -65,6 +65,9 @@ torchvision 0.28.0+cu130, Transformers 5.19.0, PEFT 0.21.2, Accelerate
 1.15.0, W&B 0.31.0 and flash-linear-attention 0.6.0. Install into the training
 environment only.
 
+Before training, stop the H200's vLLM service and verify that both its API
+process and GPU engine have released the device. Keep vLLM off for SFT.
+
 ```bash
 python -m pip install -e '.[sft]'
 robodata sft train --prepared-dir "$PREPARED" --model-path "$MODEL" --run-dir "$RUN"
@@ -82,6 +85,16 @@ times its summed outcome NLL divided by the **batch** outcome-token count.
 Each training episode contributes once, across 26 AdamW updates. Gradient
 checkpointing and computing vocabulary logits only at the predecessors of
 labelled positions keep the full multimodal causal prefix intact.
+
+Each language feed-forward layer processes up to 1,024 positions at a time.
+These projections act independently at each position. Attention still spans
+the full causal history. Training recomputes each feed-forward block during
+backpropagation and offloads saved activations to CPU memory. Tiling can
+change floating-point rounding when LoRA gradients are added across positions.
+The GPU preflight checks a short episode against native computation, then runs
+a forward and backward pass on the longest retained training episode before
+the first optimizer update. The reloaded adapter uses the same feed-forward
+tile size on the held-out layouts.
 
 ## Read the metrics
 
