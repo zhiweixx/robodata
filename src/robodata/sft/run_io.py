@@ -84,12 +84,15 @@ class OfflineMetrics:
             self.update(row)
 
     def update(self, row):
-        self.run.log(row, step=row['optimizer_step'])
+        # A later step flushes this row. Leave the last one open for validation.
+        self.run.log(row, step=row['optimizer_step'], commit=False)
 
     def finish(self, summary=None):
         if summary is None:
             self.run.finish(exit_code=1)
             return
+        validation = {key: value for key, value in summary.items() if key.startswith('val/')}
+        self.run.log(validation, step=summary['epoch/updates'], commit=True)
         self.run.summary.update(summary)
         self.run.finish()
         write_json(self.root / 'wandb_offline.json', {

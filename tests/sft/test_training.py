@@ -10,6 +10,29 @@ from robodata.sft import policy, training
 from robodata.sft.run_io import atomic, write_json
 
 
+def test_wandb_logs_validation_once_at_final_optimizer_step(monkeypatch, tmp_path):
+    import sys
+    from unittest.mock import Mock, call
+    from robodata.sft.run_io import OfflineMetrics
+
+    wandb = Mock()
+    run = wandb.init.return_value
+    run.id, run.dir, run.summary = 'test', str(tmp_path / 'files'), {}
+    monkeypatch.setitem(sys.modules, 'wandb', wandb)
+    rows = [{'optimizer_step': n, 'train/loss': 1 / n} for n in range(1, 27)]
+    metrics = OfflineMetrics(tmp_path, {'run_id': 'test'}, rows[:-1])
+    metrics.update(rows[-1])
+    validation = {'val/episodes': 11, 'val/balanced_accuracy': 0.875}
+    summary = {'epoch/updates': 26, **validation}
+    metrics.finish(summary)
+
+    assert run.log.call_args_list == [
+        *(call(row, step=row['optimizer_step'], commit=False) for row in rows),
+        call(validation, step=26, commit=True),
+    ]
+    assert run.summary == summary
+
+
 def test_exact_epoch_and_warmup():
     rows = [dict(episode_id=f's{i}', action_tokens=int(i < 46)) for i in range(201)]
     groups = policy.make_groups(rows)
